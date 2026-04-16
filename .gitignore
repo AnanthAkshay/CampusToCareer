@@ -1,0 +1,28 @@
+# ============================================================
+# RIT ISE Placement Portal — .gitignore
+# ============================================================
+
+# --- Build output ---
+target/
+*.class
+
+# --- Credentials and secrets (NEVER commit these) ---
+db.properties
+src/main/resources/db.properties
+
+# --- IDE files ---
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log
