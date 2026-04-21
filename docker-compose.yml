@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  # -----------------------------
+  # 🗄️ MySQL Database Service
+  # -----------------------------
+  db:
+    image: mysql:8.0
+    container_name: placement-db
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: Akshay@2006
+      MYSQL_DATABASE: placement_system
+      MYSQL_USER: placement_user
+      MYSQL_PASSWORD: placement_pass_2024
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/docker-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
+    networks:
+      - placement-network
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pAkshay@2006"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+  # -----------------------------
+  # 🚀 Tomcat Application
+  # -----------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: placement-app
+    restart: unless-stopped
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+      # ✅ IMPORTANT: use SAME DB as MySQL user (not root)
+      DB_URL: jdbc:mysql://db:3306/placement_system
+      DB_USER: placement_user
+      DB_PASSWORD: placement_pass_2024
+
+      # SMTP Configuration
+      SMTP_USERNAME: "ananthakshay2006@gmail.com"
+      SMTP_PASSWORD: "kjjt xpnc iwxz rlaz"
+      SMTP_FROM_EMAIL: "ananthakshay2006@gmail.com"
+
+      # Java memory
+      CATALINA_OPTS: "-Xms512m -Xmx1024m"
+
+    ports:
+      - "9090:8080"
+
+    networks:
+      - placement-network
+
+    volumes:
+      - ./data:/app/data
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+
+# -----------------------------
+# 🌐 Network
+# -----------------------------
+networks:
+  placement-network:
+    driver: bridge
+
+
+# -----------------------------
+# 💾 Volume
+# -----------------------------
+volumes:
+  mysql_data:
+    driver: local

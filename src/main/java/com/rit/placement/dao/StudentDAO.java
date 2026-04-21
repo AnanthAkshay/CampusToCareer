@@ -56,4 +56,35 @@ public class StudentDAO {
             ps.executeUpdate();
         }
     }
+    
+    /** Get all students with their user information */
+    public java.util.List<Student> getAllStudents() throws SQLException {
+        String sql = "SELECT s.*, u.usn, u.name, u.email " +
+                     "FROM students s " +
+                     "JOIN users u ON s.student_id = u.user_id " +
+                     "WHERE u.role = 'STUDENT'";
+        java.util.List<Student> students = new java.util.ArrayList<>();
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            
+            while (rs.next()) {
+                Student s = new Student();
+                s.setStudentId(rs.getInt("student_id"));
+                s.setBranch(rs.getString("branch"));
+                s.setCurrentSem(rs.getInt("current_sem"));
+                s.setSkills(rs.getString("skills"));
+                s.setProjects(rs.getString("projects"));
+                s.setExperience(rs.getString("experience"));
+                s.setUpdatedAt(rs.getTimestamp("updated_at"));
+                s.setUsn(rs.getString("usn"));
+                s.setName(rs.getString("name"));
+                s.setEmail(rs.getString("email"));
+                students.add(s);
+            }
+        }
+        
+        return students;
+    }
 }

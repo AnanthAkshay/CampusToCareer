@@ -5,7 +5,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * JDBC connection utility backed by environment variables.
+ * JDBC connection utility (Docker-ready + production-safe).
+ *
+ * Requires environment variables:
+ * DB_URL, DB_USER, DB_PASSWORD
  */
 public class DBConnection {
 
@@ -14,21 +17,23 @@ public class DBConnection {
     private static final String PASS;
 
     static {
-    URL = "jdbc:mysql://localhost:3306/rit_placement";
-    USER = "root";
-    PASS = "Akshay@2006"; // 🔴 change this
+        // 🔒 Strict environment-based configuration (no fallback)
+        URL = getEnv("DB_URL");
+        USER = getEnv("DB_USER");
+        PASS = getEnv("DB_PASSWORD");
 
-    try {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-    } catch (ClassNotFoundException e) {
-        throw new IllegalStateException("MySQL JDBC Driver not found.", e);
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC Driver not found.", e);
+        }
     }
-}
 
     private DBConnection() {
+        // prevent instantiation
     }
 
-    private static String requireEnv(String key) {
+    private static String getEnv(String key) {
         String value = System.getenv(key);
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalStateException("Missing required environment variable: " + key);
@@ -37,19 +42,21 @@ public class DBConnection {
     }
 
     /**
-     * Returns a new database connection.
-     * Caller is responsible for closing the connection (use try-with-resources).
+     * Get a new DB connection.
+     * Always use try-with-resources while calling.
      */
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASS);
     }
 
-    /** Quick connectivity test — run this standalone to verify config. */
+    /**
+     * Quick test (optional)
+     */
     public static void main(String[] args) {
         try (Connection conn = getConnection()) {
-            System.out.println("Connected to database successfully!");
-        } catch (SQLException e) {
-            System.err.println("Connection failed: " + e.getMessage());
+            System.out.println("✅ DB Connected Successfully");
+        } catch (Exception e) {
+            System.out.println("❌ DB Connection Failed: " + e.getMessage());
         }
     }
 }

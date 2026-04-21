@@ -44,6 +44,10 @@
         <span>👤</span> Profile
       </a>
     <% } %>
+    
+    <%-- Notification Bell --%>
+    <%@ include file="/components/notifications.jsp" %>
+    
     <a href="${pageContext.request.contextPath}/logout" class="nav-link">
       <span>🚪</span> Logout
     </a>

@@ -6,9 +6,14 @@ import com.rit.placement.model.Application;
 import com.rit.placement.model.JobPosting;
 import com.rit.placement.model.JobApplicationStatus;
 import com.rit.placement.service.EligibilityService;
+import com.rit.placement.service.NotificationService;
+import com.rit.placement.service.MetricsService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +26,14 @@ import java.util.List;
 @WebServlet("/apply")
 public class ApplyServlet extends HttpServlet {
 
+    private static final Logger logger = LoggerFactory.getLogger(ApplyServlet.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
+    
     private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
     private final ApplicationDAO applicationDAO = new ApplicationDAO();
     private final EligibilityService eligibilityService = new EligibilityService();
+    private final NotificationService notificationService = new NotificationService();
+    private final MetricsService metricsService = MetricsService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -67,7 +77,8 @@ public class ApplyServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/apply.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error loading jobs for student {}", userId, e);
+            metricsService.recordError();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error loading jobs: " + e.getMessage());
         }
@@ -127,16 +138,52 @@ public class ApplyServlet extends HttpServlet {
 
             // 7. Insert application
             int applicationId = applicationDAO.insertApplication(application);
+            
+            // Record metrics
+            metricsService.recordApplicationSubmitted();
+            
+            // Audit log
+            auditLogger.info("APPLICATION_SUBMITTED - StudentId: {}, JobId: {}, ApplicationId: {}", 
+                userId, jobId, applicationId);
+            
+            logger.info("Application submitted: StudentId {}, JobId {}, ApplicationId {}", 
+                userId, jobId, applicationId);
+            
+            // 8. Get job details for notification
+            JobPosting job = jobPostingDAO.getJobPostingById(jobId);
+            
+            // 9. Send notification to student
+            if (job != null) {
+                notificationService.notifyJobApplication(
+                    userId, 
+                    job.getCompanyName(), 
+                    job.getRole(), 
+                    applicationId
+                );
+                
+                // 10. Send notification to company
+                String studentName = (String) session.getAttribute("name");
+                if (studentName == null) studentName = "A student";
+                notificationService.notifyCompanyOfApplication(
+                    job.getCompanyId(),
+                    studentName,
+                    job.getRole(),
+                    applicationId
+                );
+            }
 
-            // 8. Set success message and redirect
+            // 11. Set success message and redirect
             session.setAttribute("successMessage", "Application submitted successfully! (ID: " + applicationId + ")");
             resp.sendRedirect(req.getContextPath() + "/my-applications");
 
         } catch (NumberFormatException e) {
+            logger.warn("Invalid job ID format for student {}: {}", userId, req.getParameter("job_id"));
             session.setAttribute("errorMessage", "Invalid job ID format");
             resp.sendRedirect(req.getContextPath() + "/apply");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error submitting application for student {}, jobId: {}", 
+                userId, req.getParameter("job_id"), e);
+            metricsService.recordError();
             session.setAttribute("errorMessage", "Error submitting application: " + e.getMessage());
             resp.sendRedirect(req.getContextPath() + "/apply");
         }

@@ -11,44 +11,40 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Locale;
+import java.util.Set;
 
 /**
- * Central session and authorization guard for the web layer.
+ * Production-ready session and authorization filter.
  * 
- * Authorization Strategy:
- * - Students: Read access to companies/jobs, write access to applications
- * - Coordinators/Admin: Full access to companies/jobs/applications
- * - Method-level authorization: POST operations restricted by role
+ * SECURITY RULES:
+ * - All routes require authentication except public paths
+ * - Role-based access control enforced
+ * - Session validation on every protected request
+ * 
+ * ROLE ROUTING:
+ * - STUDENT: /student/*, /apply, /companies, /job-postings, /my-applications
+ * - COORDINATOR: /admin/*, /companies, /job-postings, /applications
+ * - COMPANY: /company/*
  */
 @WebFilter("/*")
 public class SessionFilter implements Filter {
 
-    private static final String[] STUDENT_PATHS = {
-        "/student/dashboard",
-        "/student/profile",
-        "/apply",
-        "/my-applications",
-        "/companies",      // Read-only access for students
-        "/job-postings"    // Read-only access for students
-    };
+    // Public paths that don't require authentication
+    private static final Set<String> PUBLIC_PATHS = Set.of(
+        "/login",
+        "/logout",
+        "/pages/login.jsp",
+        "/pages/login-otp.jsp",
+        "/pages/verify-otp.jsp",
+        "/otp/send",
+        "/otp/verify"
+    );
 
-    private static final String[] PROCTOR_PATHS = {
-        "/proctor/dashboard"
-    };
-
-    private static final String[] ADMIN_PATHS = {
-        "/admin/dashboard",
-        "/companies",
-        "/job-postings",
-        "/eligible-students"
-    };
-
-    // Paths that require COORDINATOR/ADMIN role for POST operations
-    private static final String[] ADMIN_WRITE_PATHS = {
+    // Shared paths accessible by multiple roles
+    private static final Set<String> SHARED_PATHS = Set.of(
         "/companies",
         "/job-postings"
-    };
+    );
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -62,98 +58,141 @@ public class SessionFilter implements Filter {
             path = "/";
         }
 
-        if (isPublic(req, path)) {
+        // Allow public paths and static resources
+        if (isPublicPath(path) || isStaticResource(path)) {
             chain.doFilter(request, response);
             return;
         }
 
+        // Check authentication
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("user_id") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        String role = String.valueOf(session.getAttribute("role")).toUpperCase(Locale.ROOT);
-        String method = req.getMethod().toUpperCase();
-
-        // Check path-level authorization
-        if (!isAuthorized(role, path)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied for role: " + role);
+        // Get user role from session
+        String role = (String) session.getAttribute("role");
+        if (role == null || role.trim().isEmpty()) {
+            // Invalid session - force re-login
+            session.invalidate();
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // Check method-level authorization for write operations
-        if ("POST".equals(method) && requiresAdminForWrite(path)) {
-            if (!isAdminRole(role)) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, 
-                    "Only COORDINATOR or ADMIN can perform this operation");
-                return;
+        // Handle root path "/" - redirect to role-specific dashboard
+        if ("/".equals(path)) {
+            switch (role.trim().toUpperCase()) {
+                case "STUDENT":
+                    resp.sendRedirect(req.getContextPath() + "/student/dashboard");
+                    return;
+                case "PROCTOR":
+                    resp.sendRedirect(req.getContextPath() + "/proctor/dashboard");
+                    return;
+                case "COORDINATOR":
+                case "ADMIN":
+                    resp.sendRedirect(req.getContextPath() + "/admin/dashboard");
+                    return;
+                case "COMPANY":
+                    resp.sendRedirect(req.getContextPath() + "/company/dashboard");
+                    return;
+                default:
+                    resp.sendRedirect(req.getContextPath() + "/login");
+                    return;
             }
         }
 
+        // Enforce role-based access control
+        if (!isAuthorizedForPath(role, path)) {
+            // Send to custom 403 error page
+            req.setAttribute("errorMessage", "Access denied: " + role + " role cannot access " + path);
+            req.getRequestDispatcher("/pages/error/403.jsp").forward(req, resp);
+            return;
+        }
+
+        // All checks passed - proceed
         chain.doFilter(request, response);
     }
 
-    private boolean isPublic(HttpServletRequest req, String path) {
-        // Root should not be a wildcard. We allow it explicitly.
-        if ("/".equals(path)) {
+    /**
+     * Check if path is in public paths (exact match).
+     */
+    private boolean isPublicPath(String path) {
+        return PUBLIC_PATHS.contains(path);
+    }
+
+    /**
+     * Check if path is a static resource (CSS, JS, images).
+     */
+    private boolean isStaticResource(String path) {
+        return path.startsWith("/css/") 
+            || path.startsWith("/js/") 
+            || path.startsWith("/images/")
+            || path.startsWith("/components/");
+    }
+
+    /**
+     * Enforce role-based routing with proper access control.
+     * 
+     * STUDENT -> /student/*, /apply, /companies, /job-postings, /my-applications
+     * PROCTOR -> /proctor/* (proctor dashboard, student management)
+     * COORDINATOR/ADMIN -> /admin/*, /companies, /job-postings, /applications
+     * COMPANY -> /company/*
+     */
+    private boolean isAuthorizedForPath(String role, String path) {
+        String normalizedRole = role.trim().toUpperCase();
+
+        // Shared paths accessible by multiple roles (read-only for students)
+        if (SHARED_PATHS.contains(path)) {
             return true;
         }
 
-        // Exact public endpoints
-        if ("/login".equals(path) || "/logout".equals(path) || "/pages/login.jsp".equals(path)) {
-            return true;
-        }
-
-        // Static assets are public by prefix
-        return path.startsWith("/css/")
-                || path.startsWith("/js/")
-                || path.startsWith("/images/");
-    }
-
-    private boolean matchesAny(String path, String[] prefixes) {
-        for (String prefix : prefixes) {
-            if (path.startsWith(prefix)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAuthorized(String role, String path) {
-        switch (role) {
+        switch (normalizedRole) {
             case "STUDENT":
-                return matchesAny(path, STUDENT_PATHS);
+                // Students can access:
+                // - /student/* (profile, dashboard, etc.)
+                // - /apply (job application page)
+                // - /my-applications (view their applications)
+                // - /companies (view companies - read-only)
+                // - /job-postings (view jobs - read-only)
+                return path.startsWith("/student/") 
+                    || path.equals("/apply")
+                    || path.equals("/my-applications")
+                    || path.startsWith("/eligible-students");
+
             case "PROCTOR":
-                return matchesAny(path, PROCTOR_PATHS);
-            case "FACULTY":
+                // Proctors can access:
+                // - /proctor/* (proctor dashboard, view assigned students)
+                return path.startsWith("/proctor/");
+
             case "COORDINATOR":
             case "ADMIN":
-                return matchesAny(path, ADMIN_PATHS);
+                // Coordinators/Admins can access:
+                // - /admin/* (admin panel)
+                // - /companies (manage companies)
+                // - /job-postings (manage jobs)
+                // - /applications (view all applications)
+                return path.startsWith("/admin/") 
+                    || path.startsWith("/applications");
+
+            case "COMPANY":
+                // Companies can access:
+                // - /company/* (company dashboard)
+                return path.startsWith("/company/");
+
             default:
+                // Unknown role - deny access
                 return false;
         }
     }
 
-    /**
-     * Check if path requires admin role for write operations (POST).
-     */
-    private boolean requiresAdminForWrite(String path) {
-        return matchesAny(path, ADMIN_WRITE_PATHS);
-    }
-
-    /**
-     * Check if role is admin-level (COORDINATOR or ADMIN).
-     */
-    private boolean isAdminRole(String role) {
-        return "COORDINATOR".equals(role) || "ADMIN".equals(role);
-    }
-
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        // No initialization needed
     }
 
     @Override
     public void destroy() {
+        // No cleanup needed
     }
 }

@@ -1,7 +1,9 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.dao.DocumentDAO;
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.dao.UserDAO;
+import com.rit.placement.model.Document;
 import com.rit.placement.model.Student;
 import com.rit.placement.model.User;
 import jakarta.servlet.*;
@@ -19,6 +21,7 @@ public class ProfileServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
     private final StudentDAO studentDAO = new StudentDAO();
+    private final DocumentDAO documentDAO = new DocumentDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -55,7 +58,10 @@ public class ProfileServlet extends HttpServlet {
                 return;
             }
 
-            // 5. Set attributes for JSP
+            // 5. Fetch document information
+            Document document = documentDAO.getDocumentByStudentId(userId);
+
+            // 6. Set attributes for JSP
             req.setAttribute("name", user.getName());
             req.setAttribute("usn", user.getUsn());
             req.setAttribute("branch", student.getBranch());
@@ -63,8 +69,9 @@ public class ProfileServlet extends HttpServlet {
             req.setAttribute("skills", student.getSkills());
             req.setAttribute("projects", student.getProjects());
             req.setAttribute("experience", student.getExperience());
+            req.setAttribute("document", document);
 
-            // 6. Forward to profile.jsp
+            // 7. Forward to profile.jsp
             req.getRequestDispatcher("/pages/profile.jsp").forward(req, resp);
 
         } catch (Exception e) {

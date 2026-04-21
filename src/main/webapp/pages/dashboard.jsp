@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.rit.placement.service.JobRecommendationService.RecommendedJob" %>
 <%
   // Session guard
   if (session.getAttribute("user_id") == null) {
@@ -12,6 +14,16 @@
   Double sem2Sgpa = (Double) request.getAttribute("sem2_sgpa");
   Double sem3Sgpa = (Double) request.getAttribute("sem3_sgpa");
   Double cgpa = (Double) request.getAttribute("cgpa");
+  
+  // Readiness data
+  Integer readinessScore = (Integer) request.getAttribute("readinessScore");
+  String readinessLevel = (String) request.getAttribute("readinessLevel");
+  String readinessColor = (String) request.getAttribute("readinessColor");
+  List<String> recommendations = (List<String>) request.getAttribute("recommendations");
+  Integer applicationsCount = (Integer) request.getAttribute("applicationsCount");
+  
+  // Job recommendations
+  List<RecommendedJob> jobRecommendations = (List<RecommendedJob>) request.getAttribute("jobRecommendations");
 
   // Safe display with null handling
   String displayName = (name != null) ? name : "Student";
@@ -19,6 +31,12 @@
   String displaySem2 = (sem2Sgpa != null) ? String.format("%.2f", sem2Sgpa) : "N/A";
   String displaySem3 = (sem3Sgpa != null) ? String.format("%.2f", sem3Sgpa) : "N/A";
   String displayCgpa = (cgpa != null) ? String.format("%.2f", cgpa) : "N/A";
+  
+  // Readiness defaults
+  int scoreValue = (readinessScore != null) ? readinessScore : 0;
+  String levelText = (readinessLevel != null) ? readinessLevel : "Unknown";
+  String colorCode = (readinessColor != null) ? readinessColor : "gray";
+  int appsCount = (applicationsCount != null) ? applicationsCount : 0;
   
   // For Chart.js - use actual values or 0 for null
   double sem2Value = (sem2Sgpa != null) ? sem2Sgpa : 0.0;
@@ -37,6 +55,172 @@
   <title>Student Dashboard — RIT ISE Placement Portal</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    /* Readiness Score Styles */
+    .stat-card-readiness {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+    }
+    
+    .readiness-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+    
+    .readiness-icon {
+      font-size: 4rem;
+      opacity: 0.3;
+    }
+    
+    .readiness-score-green { color: #10b981; }
+    .readiness-score-blue { color: #3b82f6; }
+    .readiness-score-orange { color: #f59e0b; }
+    .readiness-score-red { color: #ef4444; }
+    
+    .readiness-badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    .readiness-badge-green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .readiness-badge-blue { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .readiness-badge-orange { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .readiness-badge-red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    
+    .readiness-progress-container {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      height: 30px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    
+    .readiness-progress-bar {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      transition: width 1s ease-in-out;
+      border-radius: 10px;
+    }
+    
+    .readiness-bar-green { background: linear-gradient(90deg, #10b981, #059669); }
+    .readiness-bar-blue { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+    .readiness-bar-orange { background: linear-gradient(90deg, #f59e0b, #d97706); }
+    .readiness-bar-red { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    
+    .readiness-progress-label {
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .score-breakdown {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .breakdown-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    
+    .breakdown-label {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    
+    .breakdown-value {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    /* Recommendations Section */
+    .recommendations-section {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .recommendations-header {
+      margin-bottom: 1.5rem;
+    }
+    
+    .recommendations-title {
+      font-size: 1.5rem;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+    
+    .recommendations-subtitle {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+    
+    .recommendations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .recommendation-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      background: #f9fafb;
+      border-left: 4px solid #3b82f6;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    
+    .recommendation-item:hover {
+      background: #f3f4f6;
+      transform: translateX(5px);
+    }
+    
+    .recommendation-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      background: #3b82f6;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    
+    .recommendation-text {
+      flex: 1;
+      color: #374151;
+      line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+      .stat-card-readiness {
+        grid-column: span 1 !important;
+      }
+      
+      .score-breakdown {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Loading Overlay -->
@@ -67,6 +251,51 @@
 
     <!-- Stats Cards Grid -->
     <div class="stats-grid">
+      <!-- Placement Readiness Score Card (Featured) -->
+      <div class="stat-card stat-card-readiness stat-card-featured" style="grid-column: span 2;">
+        <div class="readiness-header">
+          <div>
+            <div class="stat-label">🎯 Placement Readiness Score</div>
+            <div class="stat-value-large readiness-score-<%=colorCode%>"><%=scoreValue%>/100</div>
+            <div class="stat-subtitle">
+              <span class="readiness-badge readiness-badge-<%=colorCode%>"><%=levelText%></span>
+            </div>
+          </div>
+          <div class="readiness-icon">
+            <% if (scoreValue >= 80) { %>
+              🌟
+            <% } else if (scoreValue >= 60) { %>
+              ⭐
+            <% } else if (scoreValue >= 40) { %>
+              ✨
+            <% } else { %>
+              💫
+            <% } %>
+          </div>
+        </div>
+        <!-- Progress Bar -->
+        <div class="readiness-progress-container">
+          <div class="readiness-progress-bar readiness-bar-<%=colorCode%>" style="width: <%=scoreValue%>%">
+            <span class="readiness-progress-label"><%=scoreValue%>%</span>
+          </div>
+        </div>
+        <!-- Score Breakdown -->
+        <div class="score-breakdown">
+          <div class="breakdown-item">
+            <span class="breakdown-label">📚 CGPA</span>
+            <span class="breakdown-value">0-50 pts</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">📝 Applications</span>
+            <span class="breakdown-value"><%=appsCount%> submitted (0-30 pts)</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">🛠️ Skills</span>
+            <span class="breakdown-value">0-20 pts</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Semester 2 Card -->
       <div class="stat-card stat-card-blue">
         <div class="stat-icon">📘</div>
@@ -107,6 +336,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Recommendations Section -->
+    <% if (recommendations != null && !recommendations.isEmpty()) { %>
+    <div class="recommendations-section">
+      <div class="recommendations-header">
+        <h3 class="recommendations-title">💡 Personalized Recommendations</h3>
+        <p class="recommendations-subtitle">Action items to improve your placement readiness</p>
+      </div>
+      <div class="recommendations-list">
+        <% for (String recommendation : recommendations) { %>
+        <div class="recommendation-item">
+          <div class="recommendation-icon">✓</div>
+          <div class="recommendation-text"><%=recommendation%></div>
+        </div>
+        <% } %>
+      </div>
+    </div>
+    <% } %>
 
     <!-- Charts Section -->
     <div class="charts-container">

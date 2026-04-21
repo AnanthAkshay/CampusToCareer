@@ -167,6 +167,26 @@ public class JobPostingDAO {
             ps.executeUpdate();
         }
     }
+    
+    /**
+     * Check if a job posting has any applications.
+     * Used to prevent deletion of jobs with existing applications.
+     */
+    public boolean hasApplications(int jobId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM applications WHERE job_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, jobId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+            return false;
+        }
+    }
 
     /**
      * Map ResultSet row to JobPosting object (with company name).

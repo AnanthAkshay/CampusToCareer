@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.rit.placement.model.Document" %>
 <%
   // Session guard
   if (session.getAttribute("user_id") == null) {
@@ -14,14 +15,18 @@
   String skills = (String) request.getAttribute("skills");
   String projects = (String) request.getAttribute("projects");
   String experience = (String) request.getAttribute("experience");
+  Document document = (Document) request.getAttribute("document");
 
   // Get success/error messages from session
   String successMessage = (String) session.getAttribute("successMessage");
-  String errorMessage = (String) request.getAttribute("error");
+  String errorMessage = (String) session.getAttribute("errorMessage");
   
-  // Clear success message after displaying
+  // Clear messages after displaying
   if (successMessage != null) {
     session.removeAttribute("successMessage");
+  }
+  if (errorMessage != null) {
+    session.removeAttribute("errorMessage");
   }
 
   // Safe display with null handling
@@ -176,6 +181,62 @@
         </form>
       </div>
 
+      <!-- Document Upload Card -->
+      <div class="profile-card" style="margin-top: 20px;">
+        <div class="profile-card-header">
+          <h2 class="profile-card-title">📄 Documents</h2>
+          <p class="profile-card-subtitle">Upload your resume and certificates</p>
+        </div>
+
+        <div class="documents-section">
+          <!-- Resume Upload -->
+          <div class="document-item">
+            <div class="document-info">
+              <span class="document-icon">📄</span>
+              <div>
+                <h4>Resume</h4>
+                <% if (document != null && document.getResumePath() != null) { %>
+                  <p class="document-status">✓ Uploaded</p>
+                  <a href="${pageContext.request.contextPath}/<%=document.getResumePath()%>" 
+                     target="_blank" class="document-link">View Resume</a>
+                <% } else { %>
+                  <p class="document-status-pending">⏳ Not uploaded</p>
+                <% } %>
+              </div>
+            </div>
+            <form action="${pageContext.request.contextPath}/student/upload" method="post" 
+                  enctype="multipart/form-data" class="upload-form">
+              <input type="hidden" name="doc_type" value="resume">
+              <input type="file" name="file" accept=".pdf" required class="file-input" id="resumeFile">
+              <button type="submit" class="btn-upload">Upload Resume (PDF)</button>
+            </form>
+          </div>
+
+          <!-- Certificate Upload -->
+          <div class="document-item">
+            <div class="document-info">
+              <span class="document-icon">🎓</span>
+              <div>
+                <h4>Certificates</h4>
+                <% if (document != null && document.getCertificatesPath() != null) { %>
+                  <p class="document-status">✓ Uploaded</p>
+                  <a href="${pageContext.request.contextPath}/<%=document.getCertificatesPath()%>" 
+                     target="_blank" class="document-link">View Certificates</a>
+                <% } else { %>
+                  <p class="document-status-pending">⏳ Not uploaded</p>
+                <% } %>
+              </div>
+            </div>
+            <form action="${pageContext.request.contextPath}/student/upload" method="post" 
+                  enctype="multipart/form-data" class="upload-form">
+              <input type="hidden" name="doc_type" value="certificate">
+              <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required class="file-input" id="certFile">
+              <button type="submit" class="btn-upload">Upload Certificate</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
       <!-- Profile Tips Card -->
       <div class="tips-card">
         <div class="tips-header">
@@ -241,5 +302,71 @@
       }
     });
   </script>
+  <style>
+    .documents-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .document-icon {
+      font-size: 32px;
+    }
+    .document-status {
+      color: #16a34a;
+      font-weight: 500;
+      margin: 5px 0;
+    }
+    .document-status-pending {
+      color: #f59e0b;
+      font-weight: 500;
+      margin: 5px 0;
+    }
+    .document-link {
+      color: #3b82f6;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .document-link:hover {
+      text-decoration: underline;
+    }
+    .upload-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .file-input {
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .btn-upload {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .btn-upload:hover {
+      background: #2563eb;
+    }
+  </style>
 </body>
 </html>
