@@ -61,6 +61,74 @@ public class UserDAO {
     }
     
     /**
+     * Register a new student
+     */
+    public boolean registerStudent(String usn, String name, String email, String plainPassword) {
+        // Simple hash (same as verifyPassword uses for simple comparison)
+        String passwordHash = plainPassword; 
+        
+        String insertUserSql = "INSERT INTO users (usn, name, password_hash, email, role, is_active) VALUES (?, ?, ?, ?, 'STUDENT', TRUE)";
+        String insertStudentSql = "INSERT INTO students (student_id, branch, current_sem, skills, projects, experience) VALUES (?, 'ISE', 3, '', '', '')";
+        
+        Connection conn = null;
+        try {
+            conn = DBConnection.getConnection();
+            conn.setAutoCommit(false);
+            
+            // 1. Insert User
+            int userId = -1;
+            try (PreparedStatement stmt = conn.prepareStatement(insertUserSql, Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, usn);
+                stmt.setString(2, name);
+                stmt.setString(3, passwordHash);
+                stmt.setString(4, email);
+                stmt.executeUpdate();
+                
+                try (ResultSet keys = stmt.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        userId = keys.getInt(1);
+                    }
+                }
+            }
+            
+            if (userId == -1) {
+                conn.rollback();
+                return false;
+            }
+            
+            // 2. Insert Student
+            try (PreparedStatement stmt = conn.prepareStatement(insertStudentSql)) {
+                stmt.setInt(1, userId);
+                stmt.executeUpdate();
+            }
+            
+            conn.commit();
+            return true;
+            
+        } catch (SQLException e) {
+            System.err.println("Registration error for USN " + usn + ": " + e.getMessage());
+            e.printStackTrace();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
      * Get user by ID
      */
     public User getUserById(int userId) {
