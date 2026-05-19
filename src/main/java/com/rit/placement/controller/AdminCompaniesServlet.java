@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.CompanyRequestDAO;
 import com.rit.placement.model.Company;
@@ -15,9 +20,10 @@ import java.util.List;
  */
 @WebServlet("/admin/companies")
 public class AdminCompaniesServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminCompaniesServlet.class);
 
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final CompanyRequestDAO requestDAO = new CompanyRequestDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final CompanyRequestDAO requestDAO = DAOFactory.getInstance().getCompanyRequestDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -53,9 +59,9 @@ public class AdminCompaniesServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/admin_companies.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading companies: " + e.getMessage());
+                "Error loading companies.");
         }
     }
 
@@ -160,8 +166,8 @@ public class AdminCompaniesServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/admin/companies");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("errorMessage", "Error: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            session.setAttribute("errorMessage", "Error.");
             resp.sendRedirect(req.getContextPath() + "/admin/companies");
         }
     }

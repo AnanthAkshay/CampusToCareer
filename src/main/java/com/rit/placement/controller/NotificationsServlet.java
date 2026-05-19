@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.NotificationDAO;
 import com.rit.placement.model.Notification;
 import jakarta.servlet.ServletException;
@@ -20,8 +25,9 @@ import java.util.List;
  */
 @WebServlet("/api/notifications")
 public class NotificationsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationsServlet.class);
     
-    private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final NotificationDAO notificationDAO = DAOFactory.getInstance().getNotificationDAO();
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -75,8 +81,8 @@ public class NotificationsServlet extends HttpServlet {
             }
             
         } catch (Exception e) {
-            System.err.println("Error fetching notifications: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching notifications.");
+            logger.error("Exception occurred: ", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("{\"error\": \"Failed to fetch notifications\"}");
         }
@@ -115,8 +121,8 @@ public class NotificationsServlet extends HttpServlet {
             }
             
         } catch (Exception e) {
-            System.err.println("Error marking notification as read: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error marking notification as read.");
+            logger.error("Exception occurred: ", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("{\"error\": \"Failed to update notification\"}");
         }

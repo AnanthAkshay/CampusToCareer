@@ -260,28 +260,30 @@
             <% if (errorMessage != null) { %>
                 <div class="alert alert-error">
                     <span>⚠️</span>
-                    <span><%=errorMessage%></span>
+                    <span><%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></span>
                 </div>
             <% } %>
 
             <% if (successMessage != null) { %>
                 <div class="alert alert-success">
                     <span>✓</span>
-                    <span><%=successMessage%></span>
+                    <span><%= com.rit.placement.util.XSSUtil.escape(successMessage) %></span>
                 </div>
             <% } %>
 
             <div class="email-info">
                 <p>OTP sent to</p>
-                <strong><%=maskedEmail != null ? maskedEmail : "your email"%></strong>
+                <strong><%= com.rit.placement.util.XSSUtil.escape(maskedEmail != null ? maskedEmail : "your email") %></strong>
             </div>
 
             <div class="timer-box" id="timerBox">
                 <p>⏰ OTP expires in</p>
-                <div class="timer" id="timer"><%=String.format("%02d:%02d", remainingSeconds / 60, remainingSeconds % 60)%></div>
+                <div class="timer" id="timer"><%= com.rit.placement.util.XSSUtil.escape(String.format("%02d:%02d", remainingSeconds / 60, remainingSeconds % 60)) %></div>
             </div>
 
             <form action="${pageContext.request.contextPath}/otp/verify" method="post" id="verifyForm">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                 <div class="form-group">
                     <label>Enter 6-Digit OTP</label>
                     <div class="otp-input-container">
@@ -302,7 +304,9 @@
             </form>
 
             <form action="${pageContext.request.contextPath}/otp/send" method="post">
-                <input type="hidden" name="usn" value="<%=session.getAttribute("otp_usn")%>">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
+                <input type="hidden" name="usn" value="<%= com.rit.placement.util.XSSUtil.escape(session.getAttribute("otp_usn")) %>">
                 <button type="submit" class="btn-secondary">
                     🔄 Resend OTP
                 </button>
@@ -388,7 +392,7 @@
         });
 
         // Countdown timer
-        let remainingSeconds = <%=remainingSeconds%>;
+        let remainingSeconds = <%= com.rit.placement.util.XSSUtil.escape(remainingSeconds) %>;
         const timerElement = document.getElementById('timer');
         const timerBox = document.getElementById('timerBox');
 

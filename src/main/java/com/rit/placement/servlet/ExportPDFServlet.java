@@ -1,5 +1,8 @@
 package com.rit.placement.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -28,6 +31,7 @@ import java.util.Map;
  */
 @WebServlet("/admin/export/pdf")
 public class ExportPDFServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(ExportPDFServlet.class);
     
     private final ReportDAO reportDAO = new ReportDAO();
     
@@ -168,8 +172,8 @@ public class ExportPDFServlet extends HttpServlet {
             System.out.println("PDF export successful: " + filename + " (" + students.size() + " records)");
             
         } catch (Exception e) {
-            System.err.println("Error exporting PDF: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error exporting PDF: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
                 "Failed to generate PDF report: " + e.getMessage());
         }

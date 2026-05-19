@@ -64,14 +64,14 @@
     <% if (successMessage != null) { %>
       <div class="alert alert-success" role="status" aria-live="polite">
         <span class="alert-icon">✓</span>
-        <%=successMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(successMessage) %>
       </div>
     <% } %>
     
     <% if (errorMessage != null) { %>
       <div class="alert alert-error">
         <span class="alert-icon">✕</span>
-        <%=errorMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %>
       </div>
     <% } %>
 
@@ -82,7 +82,7 @@
         <div class="stat-icon">📝</div>
         <div class="stat-content">
           <div class="stat-label">Total Applications</div>
-          <div class="stat-value"><%=stats.getTotal()%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getTotal()) %></div>
         </div>
       </div>
 
@@ -90,7 +90,7 @@
         <div class="stat-icon">⏳</div>
         <div class="stat-content">
           <div class="stat-label">Applied</div>
-          <div class="stat-value"><%=stats.getApplied()%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getApplied()) %></div>
           <div class="stat-trend">
             <span class="trend-indicator">Under Review</span>
           </div>
@@ -101,7 +101,7 @@
         <div class="stat-icon">✓</div>
         <div class="stat-content">
           <div class="stat-label">Shortlisted</div>
-          <div class="stat-value"><%=stats.getShortlisted()%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getShortlisted()) %></div>
           <div class="stat-trend">
             <span class="trend-indicator">Good Progress!</span>
           </div>
@@ -112,7 +112,7 @@
         <div class="stat-icon">🎉</div>
         <div class="stat-content">
           <div class="stat-label">Selected</div>
-          <div class="stat-value"><%=stats.getSelected()%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getSelected()) %></div>
         </div>
       </div>
     </div>
@@ -150,17 +150,17 @@
                  }
             %>
               <tr class="application-row">
-                <td class="app-id-cell">#<%=app.getApplicationId()%></td>
+                <td class="app-id-cell">#<%= com.rit.placement.util.XSSUtil.escape(app.getApplicationId()) %></td>
                 <td class="company-cell">
-                  <strong><%=app.getCompanyName()%></strong>
+                  <strong><%= com.rit.placement.util.XSSUtil.escape(app.getCompanyName()) %></strong>
                 </td>
-                <td class="role-cell"><%=app.getJobRole()%></td>
+                <td class="role-cell"><%= com.rit.placement.util.XSSUtil.escape(app.getJobRole()) %></td>
                 <td class="date-cell">
-                  <%= app.getAppliedAt() != null ? dateFormat.format(app.getAppliedAt()) : "N/A" %>
+                  <%= com.rit.placement.util.XSSUtil.escape(app.getAppliedAt() != null ? dateFormat.format(app.getAppliedAt()) : "N/A") %>
                 </td>
                 <td class="status-cell">
-                  <span class="badge <%=statusClass%>">
-                    <%=statusIcon%> <%=app.getStatus()%>
+                  <span class="badge <%= com.rit.placement.util.XSSUtil.escape(statusClass) %>">
+                    <%= com.rit.placement.util.XSSUtil.escape(statusIcon) %> <%= com.rit.placement.util.XSSUtil.escape(app.getStatus()) %>
                   </span>
                 </td>
               </tr>

@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.model.Company;
 import jakarta.servlet.*;
@@ -15,8 +20,9 @@ import java.util.List;
  */
 @WebServlet("/companies")
 public class CompanyServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyServlet.class);
 
-    private final CompanyDAO companyDAO = new CompanyDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -40,9 +46,9 @@ public class CompanyServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/companies.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading companies: " + e.getMessage());
+                "Error loading companies.");
         }
     }
 
@@ -92,8 +98,8 @@ public class CompanyServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/companies");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Error adding company: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            req.setAttribute("error", "Error adding company.");
             doGet(req, resp);
         }
     }

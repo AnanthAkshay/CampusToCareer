@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.model.Application;
 import jakarta.servlet.*;
@@ -14,8 +19,9 @@ import java.util.List;
  */
 @WebServlet("/admin/applications")
 public class AdminApplicationsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminApplicationsServlet.class);
 
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -50,9 +56,9 @@ public class AdminApplicationsServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/admin_applications.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading applications: " + e.getMessage());
+                "Error loading applications.");
         }
     }
 
@@ -98,8 +104,8 @@ public class AdminApplicationsServlet extends HttpServlet {
             session.setAttribute("errorMessage", "Invalid application ID");
             resp.sendRedirect(req.getContextPath() + "/admin/applications");
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("errorMessage", "Error updating application: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            session.setAttribute("errorMessage", "Error updating application.");
             resp.sendRedirect(req.getContextPath() + "/admin/applications");
         }
     }

@@ -1,5 +1,10 @@
 package com.rit.placement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.NotificationDAO;
 import com.rit.placement.dao.UserDAO;
 import com.rit.placement.model.Notification;
@@ -11,9 +16,10 @@ import com.rit.placement.util.EmailUtil;
  * Handles both in-app and email notifications
  */
 public class NotificationService {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationService.class);
     
-    private final NotificationDAO notificationDAO = new NotificationDAO();
-    private final UserDAO userDAO = new UserDAO();
+    private final NotificationDAO notificationDAO = DAOFactory.getInstance().getNotificationDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
     private final EmailUtil emailUtil = new EmailUtil();
     
     /**
@@ -52,8 +58,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating application notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating application notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -97,8 +103,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating status change notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating status change notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -141,8 +147,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating shortlist notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating shortlist notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -183,8 +189,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating rejection notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating rejection notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -228,8 +234,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating selection notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating selection notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -278,8 +284,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating interview notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating interview notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -318,8 +324,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating job posted notification for student " + studentId + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating job posted notification for student " + studentId + ": " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -343,8 +349,8 @@ public class NotificationService {
             System.out.println("New job notification created: " + jobTitle + " at " + companyName);
             
         } catch (Exception e) {
-            System.err.println("Error creating job posted notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating job posted notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
     
@@ -382,8 +388,8 @@ public class NotificationService {
             }
             
         } catch (Exception e) {
-            System.err.println("Error creating company application notification: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error creating company application notification: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
         }
     }
 }

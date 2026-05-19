@@ -236,10 +236,10 @@
     <!-- Header Section -->
     <div class="dashboard-header">
       <div>
-        <h1 class="page-title">Welcome back, <%=displayName%>! 👋</h1>
+        <h1 class="page-title">Welcome back, <%= com.rit.placement.util.XSSUtil.escape(displayName) %>! 👋</h1>
         <p class="page-subtitle">
           <span class="badge badge-info">STUDENT</span>
-          <span class="usn-badge">USN: <%=displayUsn%></span>
+          <span class="usn-badge">USN: <%= com.rit.placement.util.XSSUtil.escape(displayUsn) %></span>
         </p>
       </div>
       <div class="header-actions">
@@ -256,9 +256,9 @@
         <div class="readiness-header">
           <div>
             <div class="stat-label">🎯 Placement Readiness Score</div>
-            <div class="stat-value-large readiness-score-<%=colorCode%>"><%=scoreValue%>/100</div>
+            <div class="stat-value-large readiness-score-<%= com.rit.placement.util.XSSUtil.escape(colorCode) %>"><%= com.rit.placement.util.XSSUtil.escape(scoreValue) %>/100</div>
             <div class="stat-subtitle">
-              <span class="readiness-badge readiness-badge-<%=colorCode%>"><%=levelText%></span>
+              <span class="readiness-badge readiness-badge-<%= com.rit.placement.util.XSSUtil.escape(colorCode) %>"><%= com.rit.placement.util.XSSUtil.escape(levelText) %></span>
             </div>
           </div>
           <div class="readiness-icon">
@@ -275,8 +275,8 @@
         </div>
         <!-- Progress Bar -->
         <div class="readiness-progress-container">
-          <div class="readiness-progress-bar readiness-bar-<%=colorCode%>" style="width: <%=scoreValue%>%">
-            <span class="readiness-progress-label"><%=scoreValue%>%</span>
+          <div class="readiness-progress-bar readiness-bar-<%= com.rit.placement.util.XSSUtil.escape(colorCode) %>" style="width: <%= com.rit.placement.util.XSSUtil.escape(scoreValue) %>%">
+            <span class="readiness-progress-label"><%= com.rit.placement.util.XSSUtil.escape(scoreValue) %>%</span>
           </div>
         </div>
         <!-- Score Breakdown -->
@@ -287,7 +287,7 @@
           </div>
           <div class="breakdown-item">
             <span class="breakdown-label">📝 Applications</span>
-            <span class="breakdown-value"><%=appsCount%> submitted (0-30 pts)</span>
+            <span class="breakdown-value"><%= com.rit.placement.util.XSSUtil.escape(appsCount) %> submitted (0-30 pts)</span>
           </div>
           <div class="breakdown-item">
             <span class="breakdown-label">🛠️ Skills</span>
@@ -301,7 +301,7 @@
         <div class="stat-icon">📘</div>
         <div class="stat-content">
           <div class="stat-label">Semester 2 SGPA</div>
-          <div class="stat-value"><%=displaySem2%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(displaySem2) %></div>
           <div class="stat-trend">
             <span class="trend-indicator">Previous Semester</span>
           </div>
@@ -313,7 +313,7 @@
         <div class="stat-icon">📗</div>
         <div class="stat-content">
           <div class="stat-label">Semester 3 SGPA</div>
-          <div class="stat-value"><%=displaySem3%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(displaySem3) %></div>
           <div class="stat-trend">
             <span class="trend-indicator">Current Semester</span>
           </div>
@@ -325,12 +325,12 @@
         <div class="stat-icon-large">🎓</div>
         <div class="stat-content">
           <div class="stat-label">Current CGPA</div>
-          <div class="stat-value-large"><%=displayCgpa%></div>
+          <div class="stat-value-large"><%= com.rit.placement.util.XSSUtil.escape(displayCgpa) %></div>
           <div class="stat-subtitle">Out of 10.0</div>
           <!-- CGPA Progress Bar -->
           <div class="progress-bar-container">
-            <div class="progress-bar" style="width: <%=cgpaPercentage%>%">
-              <span class="progress-label"><%=String.format("%.0f", cgpaPercentage)%>%</span>
+            <div class="progress-bar" style="width: <%= com.rit.placement.util.XSSUtil.escape(cgpaPercentage) %>%">
+              <span class="progress-label"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.0f", cgpaPercentage)) %>%</span>
             </div>
           </div>
         </div>
@@ -348,7 +348,7 @@
         <% for (String recommendation : recommendations) { %>
         <div class="recommendation-item">
           <div class="recommendation-icon">✓</div>
-          <div class="recommendation-text"><%=recommendation%></div>
+          <div class="recommendation-text"><%= com.rit.placement.util.XSSUtil.escape(recommendation) %></div>
         </div>
         <% } %>
       </div>
@@ -391,21 +391,21 @@
                   <span class="summary-dot dot-blue"></span>
                   Semester 2 SGPA
                 </div>
-                <div class="summary-value"><%=displaySem2%></div>
+                <div class="summary-value"><%= com.rit.placement.util.XSSUtil.escape(displaySem2) %></div>
               </div>
               <div class="summary-item">
                 <div class="summary-label">
                   <span class="summary-dot dot-purple"></span>
                   Semester 3 SGPA
                 </div>
-                <div class="summary-value"><%=displaySem3%></div>
+                <div class="summary-value"><%= com.rit.placement.util.XSSUtil.escape(displaySem3) %></div>
               </div>
               <div class="summary-item summary-item-highlight">
                 <div class="summary-label">
                   <span class="summary-dot dot-gradient"></span>
                   Overall CGPA
                 </div>
-                <div class="summary-value"><%=displayCgpa%></div>
+                <div class="summary-value"><%= com.rit.placement.util.XSSUtil.escape(displayCgpa) %></div>
               </div>
               <div class="summary-divider"></div>
               <div class="summary-item">
@@ -488,7 +488,7 @@
       labels: ['Semester 2', 'Semester 3'],
       datasets: [{
         label: 'SGPA',
-        data: [<%=sem2Value%>, <%=sem3Value%>],
+        data: [<%= com.rit.placement.util.XSSUtil.escape(sem2Value) %>, <%= com.rit.placement.util.XSSUtil.escape(sem3Value) %>],
         backgroundColor: [
           'rgba(59, 130, 246, 0.8)',
           'rgba(147, 51, 234, 0.8)'

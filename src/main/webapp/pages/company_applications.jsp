@@ -3,7 +3,7 @@
 <%@ page import="com.rit.placement.model.Application" %>
 <%@ page import="com.rit.placement.model.Student" %>
 <%@ page import="com.rit.placement.model.JobPosting" %>
-<%@ page import="com.rit.placement.util.CSRFUtil" %>
+
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.text.SimpleDateFormat" %>
@@ -32,8 +32,6 @@
   if (totalPages == null) totalPages = 1;
   if (totalApps == null) totalApps = 0;
   
-  // Generate CSRF token
-  String csrfToken = CSRFUtil.getToken(session);
   
   SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
   
@@ -59,7 +57,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Applications — <%= company != null ? company.getCompanyName() : "Company" %></title>
+  <title>Applications — <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company") %></title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -284,7 +282,7 @@
 </head>
 <body>
   <div class="navbar">
-    <h1>🏢 <%= company != null ? company.getCompanyName() : "Company Portal" %></h1>
+    <h1>🏢 <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company Portal") %></h1>
     <div>
       <a href="${pageContext.request.contextPath}/company/dashboard">Dashboard</a>
       <a href="${pageContext.request.contextPath}/company/jobs">Manage Jobs</a>
@@ -294,42 +292,42 @@
 
   <div class="container">
     <% if (successMessage != null) { %>
-      <div class="alert alert-success"><%= successMessage %></div>
+      <div class="alert alert-success"><%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error"><%= errorMessage %></div>
+      <div class="alert alert-error"><%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <!-- Filter Stats -->
     <div class="stats-grid">
       <a href="${pageContext.request.contextPath}/company/applications" style="text-decoration: none;">
-        <div class="stat-card <%= filterStatus == null || "".equals(filterStatus) ? "active" : "" %>">
+        <div class="stat-card <%= com.rit.placement.util.XSSUtil.escape(filterStatus == null || "".equals(filterStatus) ? "active" : "") %>">
           <div class="stat-label">All Applications</div>
-          <div class="stat-value"><%= allApplications != null ? allApplications.size() : 0 %></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(allApplications != null ? allApplications.size() : 0) %></div>
         </div>
       </a>
       <a href="${pageContext.request.contextPath}/company/applications?status=PENDING" style="text-decoration: none;">
-        <div class="stat-card <%= "PENDING".equals(filterStatus) ? "active" : "" %>">
+        <div class="stat-card <%= com.rit.placement.util.XSSUtil.escape("PENDING".equals(filterStatus) ? "active" : "") %>">
           <div class="stat-label">Pending Review</div>
-          <div class="stat-value"><%= pendingCount %></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(pendingCount) %></div>
         </div>
       </a>
       <a href="${pageContext.request.contextPath}/company/applications?status=SHORTLISTED" style="text-decoration: none;">
-        <div class="stat-card <%= "SHORTLISTED".equals(filterStatus) ? "active" : "" %>">
+        <div class="stat-card <%= com.rit.placement.util.XSSUtil.escape("SHORTLISTED".equals(filterStatus) ? "active" : "") %>">
           <div class="stat-label">Shortlisted</div>
-          <div class="stat-value"><%= shortlistedCount %></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(shortlistedCount) %></div>
         </div>
       </a>
       <a href="${pageContext.request.contextPath}/company/applications?status=SELECTED" style="text-decoration: none;">
-        <div class="stat-card <%= "SELECTED".equals(filterStatus) ? "active" : "" %>">
+        <div class="stat-card <%= com.rit.placement.util.XSSUtil.escape("SELECTED".equals(filterStatus) ? "active" : "") %>">
           <div class="stat-label">Selected</div>
-          <div class="stat-value"><%= selectedCount %></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(selectedCount) %></div>
         </div>
       </a>
       <a href="${pageContext.request.contextPath}/company/applications?status=REJECTED" style="text-decoration: none;">
-        <div class="stat-card <%= "REJECTED".equals(filterStatus) ? "active" : "" %>">
+        <div class="stat-card <%= com.rit.placement.util.XSSUtil.escape("REJECTED".equals(filterStatus) ? "active" : "") %>">
           <div class="stat-label">Rejected</div>
-          <div class="stat-value"><%= rejectedCount %></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(rejectedCount) %></div>
         </div>
       </a>
     </div>
@@ -337,7 +335,7 @@
     <!-- Applications Table -->
     <div class="section">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 style="margin: 0;">📝 Applications <%= filterStatus != null && !filterStatus.isEmpty() ? "(" + filterStatus + ")" : "" %></h3>
+        <h3 style="margin: 0;">📝 Applications <%= com.rit.placement.util.XSSUtil.escape(filterStatus != null && !filterStatus.isEmpty() ? "(" + filterStatus + ")" : "") %></h3>
         
         <!-- Job Filter -->
         <% if (companyJobs != null && companyJobs.size() > 1) { %>
@@ -346,8 +344,8 @@
           <select id="jobFilter" onchange="filterByJob(this.value)" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem;">
             <option value="">All Jobs</option>
             <% for (JobPosting job : companyJobs) { %>
-              <option value="<%= job.getJobId() %>" <%= filterJobId != null && filterJobId.equals(String.valueOf(job.getJobId())) ? "selected" : "" %>>
-                <%= job.getRole() %>
+              <option value="<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>" <%= com.rit.placement.util.XSSUtil.escape(filterJobId != null && filterJobId.equals(String.valueOf(job.getJobId())) ? "selected" : "") %>>
+                <%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %>
               </option>
             <% } %>
           </select>
@@ -396,42 +394,40 @@
                   <% } else if (rank == 3) { %>
                     🥉
                   <% } else { %>
-                    #<%= rank %>
+                    #<%= com.rit.placement.util.XSSUtil.escape(rank) %>
                   <% } %>
                 </div>
               </td>
               <!-- Score Column -->
               <td style="text-align: center;">
-                <div style="font-size: 1.2rem; font-weight: 700; color: <%= 
-                  score >= 85 ? "#10b981" : 
+                <div style="font-size: 1.2rem; font-weight: 700; color: <%= com.rit.placement.util.XSSUtil.escape(score >= 85 ? "#10b981" : 
                   score >= 70 ? "#3b82f6" : 
                   score >= 55 ? "#8b5cf6" : 
-                  score >= 40 ? "#f59e0b" : "#6b7280" 
-                %>;">
-                  <%= score %>
+                  score >= 40 ? "#f59e0b" : "#6b7280") %>;">
+                  <%= com.rit.placement.util.XSSUtil.escape(score) %>
                 </div>
                 <div style="font-size: 0.7rem; color: #6b7280; font-weight: 600;">
-                  <%= score >= 85 ? "Excellent" : 
+                  <%= com.rit.placement.util.XSSUtil.escape(score >= 85 ? "Excellent" : 
                       score >= 70 ? "Strong" : 
                       score >= 55 ? "Good" : 
-                      score >= 40 ? "Fair" : "Consider" %>
+                      score >= 40 ? "Fair" : "Consider") %>
                 </div>
               </td>
               <% } %>
               <td>
-                <strong><%= app.getStudentName() != null ? app.getStudentName() : "N/A" %></strong>
-                <div class="student-details">USN: <%= app.getStudentUsn() != null ? app.getStudentUsn() : "N/A" %></div>
+                <strong><%= com.rit.placement.util.XSSUtil.escape(app.getStudentName() != null ? app.getStudentName() : "N/A") %></strong>
+                <div class="student-details">USN: <%= com.rit.placement.util.XSSUtil.escape(app.getStudentUsn() != null ? app.getStudentUsn() : "N/A") %></div>
               </td>
-              <td><%= app.getJobTitle() != null ? app.getJobTitle() : "N/A" %></td>
-              <td><%= cgpa != null ? String.format("%.2f", cgpa) : "N/A" %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getJobTitle() != null ? app.getJobTitle() : "N/A") %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(cgpa != null ? String.format("%.2f", cgpa) : "N/A") %></td>
               <td>
                 <% if (student != null && student.getSkills() != null && !student.getSkills().trim().isEmpty()) { %>
-                  <%= student.getSkills().length() > 50 ? student.getSkills().substring(0, 50) + "..." : student.getSkills() %>
+                  <%= com.rit.placement.util.XSSUtil.escape(student.getSkills().length() > 50 ? student.getSkills().substring(0, 50) + "..." : student.getSkills()) %>
                 <% } else { %>
                   <span style="color: #9ca3af;">Not specified</span>
                 <% } %>
               </td>
-              <td><%= app.getAppliedDate() != null ? dateFormat.format(app.getAppliedDate()) : "N/A" %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getAppliedDate() != null ? dateFormat.format(app.getAppliedDate()) : "N/A") %></td>
               <td>
                 <!-- Dynamic Timeline -->
                 <div class="timeline-container">
@@ -443,22 +439,22 @@
                     boolean isSelected = "SELECTED".equals(currentStatus);
                     boolean isRejected = "REJECTED".equals(currentStatus);
                   %>
-                  <div class="timeline-step <%= isPending || isShortlisted || isInterview || isSelected ? "active" : "" %> <%= isPending ? "current" : "" %>">
+                  <div class="timeline-step <%= com.rit.placement.util.XSSUtil.escape(isPending || isShortlisted || isInterview || isSelected ? "active" : "") %> <%= com.rit.placement.util.XSSUtil.escape(isPending ? "current" : "") %>">
                     <div class="timeline-dot"></div>
                     <div class="timeline-label">Pending</div>
                   </div>
-                  <div class="timeline-line <%= isShortlisted || isInterview || isSelected ? "active" : "" %>"></div>
-                  <div class="timeline-step <%= isShortlisted || isInterview || isSelected ? "active" : "" %> <%= isShortlisted ? "current" : "" %>">
+                  <div class="timeline-line <%= com.rit.placement.util.XSSUtil.escape(isShortlisted || isInterview || isSelected ? "active" : "") %>"></div>
+                  <div class="timeline-step <%= com.rit.placement.util.XSSUtil.escape(isShortlisted || isInterview || isSelected ? "active" : "") %> <%= com.rit.placement.util.XSSUtil.escape(isShortlisted ? "current" : "") %>">
                     <div class="timeline-dot"></div>
                     <div class="timeline-label">Shortlisted</div>
                   </div>
-                  <div class="timeline-line <%= isInterview || isSelected ? "active" : "" %>"></div>
-                  <div class="timeline-step <%= isInterview || isSelected ? "active" : "" %> <%= isInterview ? "current" : "" %>">
+                  <div class="timeline-line <%= com.rit.placement.util.XSSUtil.escape(isInterview || isSelected ? "active" : "") %>"></div>
+                  <div class="timeline-step <%= com.rit.placement.util.XSSUtil.escape(isInterview || isSelected ? "active" : "") %> <%= com.rit.placement.util.XSSUtil.escape(isInterview ? "current" : "") %>">
                     <div class="timeline-dot"></div>
                     <div class="timeline-label">Interview</div>
                   </div>
-                  <div class="timeline-line <%= isSelected ? "active" : "" %>"></div>
-                  <div class="timeline-step <%= isSelected ? "active" : "" %> <%= isSelected ? "current" : "" %>">
+                  <div class="timeline-line <%= com.rit.placement.util.XSSUtil.escape(isSelected ? "active" : "") %>"></div>
+                  <div class="timeline-step <%= com.rit.placement.util.XSSUtil.escape(isSelected ? "active" : "") %> <%= com.rit.placement.util.XSSUtil.escape(isSelected ? "current" : "") %>">
                     <div class="timeline-dot"></div>
                     <div class="timeline-label">Selected</div>
                   </div>
@@ -471,16 +467,18 @@
               </td>
               <td>
                 <form method="post" action="${pageContext.request.contextPath}/company/applications" style="display: inline;">
-                  <input type="hidden" name="csrf_token" value="<%= csrfToken %>">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
+
                   <input type="hidden" name="action" value="update_status">
-                  <input type="hidden" name="application_id" value="<%= app.getId() %>">
+                  <input type="hidden" name="application_id" value="<%= com.rit.placement.util.XSSUtil.escape(app.getId()) %>">
                   <select name="status" class="status-select" onchange="this.form.submit()">
                     <option value="">Change Status</option>
-                    <option value="PENDING" <%= "PENDING".equals(app.getStatus()) ? "selected" : "" %>>Pending</option>
-                    <option value="SHORTLISTED" <%= "SHORTLISTED".equals(app.getStatus()) ? "selected" : "" %>>Shortlist</option>
-                    <option value="INTERVIEW" <%= "INTERVIEW".equals(app.getStatus()) ? "selected" : "" %>>Interview</option>
-                    <option value="SELECTED" <%= "SELECTED".equals(app.getStatus()) ? "selected" : "" %>>Select</option>
-                    <option value="REJECTED" <%= "REJECTED".equals(app.getStatus()) ? "selected" : "" %>>Reject</option>
+                    <option value="PENDING" <%= com.rit.placement.util.XSSUtil.escape("PENDING".equals(app.getStatus()) ? "selected" : "") %>>Pending</option>
+                    <option value="SHORTLISTED" <%= com.rit.placement.util.XSSUtil.escape("SHORTLISTED".equals(app.getStatus()) ? "selected" : "") %>>Shortlist</option>
+                    <option value="INTERVIEW" <%= com.rit.placement.util.XSSUtil.escape("INTERVIEW".equals(app.getStatus()) ? "selected" : "") %>>Interview</option>
+                    <option value="SELECTED" <%= com.rit.placement.util.XSSUtil.escape("SELECTED".equals(app.getStatus()) ? "selected" : "") %>>Select</option>
+                    <option value="REJECTED" <%= com.rit.placement.util.XSSUtil.escape("REJECTED".equals(app.getStatus()) ? "selected" : "") %>>Reject</option>
                   </select>
                 </form>
               </td>
@@ -490,7 +488,7 @@
         </table>
       <% } else { %>
         <p style="text-align: center; color: #6b7280; padding: 3rem;">
-          No applications <%= filterStatus != null && !filterStatus.isEmpty() ? "with status " + filterStatus : "" %> found.
+          No applications <%= com.rit.placement.util.XSSUtil.escape(filterStatus != null && !filterStatus.isEmpty() ? "with status " + filterStatus : "") %> found.
         </p>
       <% } %>
     </div>
@@ -499,13 +497,13 @@
     <% if (totalPages > 1) { %>
     <div class="pagination-container">
       <div class="pagination-info">
-        Showing <%= applications != null && !applications.isEmpty() ? ((currentPage - 1) * 20 + 1) : 0 %> 
-        to <%= applications != null ? Math.min(currentPage * 20, totalApps) : 0 %> 
-        of <%= totalApps %> applications
+        Showing <%= com.rit.placement.util.XSSUtil.escape(applications != null && !applications.isEmpty() ? ((currentPage - 1) * 20 + 1) : 0) %> 
+        to <%= com.rit.placement.util.XSSUtil.escape(applications != null ? Math.min(currentPage * 20, totalApps) : 0) %> 
+        of <%= com.rit.placement.util.XSSUtil.escape(totalApps) %> applications
       </div>
       <div class="pagination">
         <% if (currentPage > 1) { %>
-          <a href="?page=<%= currentPage - 1 %><%= filterStatus != null ? "&status=" + filterStatus : "" %>" class="page-link">← Previous</a>
+          <a href="?page=<%= com.rit.placement.util.XSSUtil.escape(currentPage - 1) %><%= com.rit.placement.util.XSSUtil.escape(filterStatus != null ? "&status=" + filterStatus : "") %>" class="page-link">← Previous</a>
         <% } %>
         
         <% 
@@ -513,26 +511,26 @@
           int endPage = Math.min(totalPages, currentPage + 2);
           
           if (startPage > 1) { %>
-            <a href="?page=1<%= filterStatus != null ? "&status=" + filterStatus : "" %>" class="page-link">1</a>
+            <a href="?page=1<%= com.rit.placement.util.XSSUtil.escape(filterStatus != null ? "&status=" + filterStatus : "") %>" class="page-link">1</a>
             <% if (startPage > 2) { %>
               <span class="page-ellipsis">...</span>
             <% } %>
           <% }
           
           for (int i = startPage; i <= endPage; i++) { %>
-            <a href="?page=<%= i %><%= filterStatus != null ? "&status=" + filterStatus : "" %>" 
-               class="page-link <%= i == currentPage ? "active" : "" %>"><%= i %></a>
+            <a href="?page=<%= com.rit.placement.util.XSSUtil.escape(i) %><%= com.rit.placement.util.XSSUtil.escape(filterStatus != null ? "&status=" + filterStatus : "") %>" 
+               class="page-link <%= com.rit.placement.util.XSSUtil.escape(i == currentPage ? "active" : "") %>"><%= com.rit.placement.util.XSSUtil.escape(i) %></a>
           <% }
           
           if (endPage < totalPages) { 
             if (endPage < totalPages - 1) { %>
               <span class="page-ellipsis">...</span>
             <% } %>
-            <a href="?page=<%= totalPages %><%= filterStatus != null ? "&status=" + filterStatus : "" %>" class="page-link"><%= totalPages %></a>
+            <a href="?page=<%= com.rit.placement.util.XSSUtil.escape(totalPages) %><%= com.rit.placement.util.XSSUtil.escape(filterStatus != null ? "&status=" + filterStatus : "") %>" class="page-link"><%= com.rit.placement.util.XSSUtil.escape(totalPages) %></a>
           <% } %>
         
         <% if (currentPage < totalPages) { %>
-          <a href="?page=<%= currentPage + 1 %><%= filterStatus != null ? "&status=" + filterStatus : "" %>" class="page-link">Next →</a>
+          <a href="?page=<%= com.rit.placement.util.XSSUtil.escape(currentPage + 1) %><%= com.rit.placement.util.XSSUtil.escape(filterStatus != null ? "&status=" + filterStatus : "") %>" class="page-link">Next →</a>
         <% } %>
       </div>
     </div>

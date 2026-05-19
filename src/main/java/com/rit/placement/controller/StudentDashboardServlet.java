@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.AcademicDAO;
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.StudentDAO;
@@ -23,11 +28,12 @@ import java.util.List;
  */
 @WebServlet("/student/dashboard")
 public class StudentDashboardServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(StudentDashboardServlet.class);
 
-    private final UserDAO userDAO = new UserDAO();
-    private final AcademicDAO academicDAO = new AcademicDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final AcademicDAO academicDAO = DAOFactory.getInstance().getAcademicDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
     private final ReadinessService readinessService = new ReadinessService();
     private final JobRecommendationService recommendationService = new JobRecommendationService();
 
@@ -93,7 +99,7 @@ public class StudentDashboardServlet extends HttpServlet {
             student.setCgpa(cgpa >= 0 ? cgpa : 0.0);
 
             // 8. Count applications
-            int applicationsCount = applicationDAO.getApplicationsByStudent(userId).size();
+            int applicationsCount = applicationDAO.getStudentStats(userId).getTotal();
 
             // 9. Calculate readiness score and get recommendations
             int readinessScore = readinessService.calculateScore(student, applicationsCount);
@@ -125,9 +131,9 @@ public class StudentDashboardServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/dashboard.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                "Error loading dashboard: " + e.getMessage());
+                "Error loading dashboard.");
         }
     }
 }

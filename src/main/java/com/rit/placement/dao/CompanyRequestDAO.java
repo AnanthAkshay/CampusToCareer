@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.CompanyRequest;
 import com.rit.placement.util.DBConnection;
 import java.sql.*;
@@ -10,6 +13,7 @@ import java.util.List;
  * DAO for company_requests table
  */
 public class CompanyRequestDAO {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyRequestDAO.class);
 
     /**
      * Insert a new company request
@@ -82,12 +86,13 @@ public class CompanyRequestDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, requestId);
-            ResultSet rs = ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
             
-            if (rs.next()) {
-                return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+                return null;
             }
-            return null;
         }
     }
 

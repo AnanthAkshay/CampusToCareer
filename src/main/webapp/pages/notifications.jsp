@@ -162,7 +162,7 @@
       <div>
         <h2>🔔 Notifications</h2>
         <% if (unreadCount > 0) { %>
-          <p style="color: #6b7280; margin-top: 0.5rem;"><%= unreadCount %> unread notification<%= unreadCount > 1 ? "s" : "" %></p>
+          <p style="color: #6b7280; margin-top: 0.5rem;"><%= com.rit.placement.util.XSSUtil.escape(unreadCount) %> unread notification<%= com.rit.placement.util.XSSUtil.escape(unreadCount > 1 ? "s" : "") %></p>
         <% } %>
       </div>
       <% if (notifications != null && !notifications.isEmpty()) { %>
@@ -173,22 +173,22 @@
     <div class="notifications-container">
       <% if (notifications != null && !notifications.isEmpty()) { %>
         <% for (Notification notif : notifications) { %>
-          <div class="notification-item <%= notif.isRead() ? "" : "unread" %>" id="notif-<%= notif.getNotificationId() %>">
+          <div class="notification-item <%= com.rit.placement.util.XSSUtil.escape(notif.isRead() ? "" : "unread") %>" id="notif-<%= com.rit.placement.util.XSSUtil.escape(notif.getNotificationId()) %>">
             <div class="notification-header">
-              <div class="notification-title"><%= notif.getTitle() %></div>
-              <span class="notification-type type-<%= notif.getType().toLowerCase() %>">
-                <%= notif.getType().replace("_", " ") %>
+              <div class="notification-title"><%= com.rit.placement.util.XSSUtil.escape(notif.getTitle()) %></div>
+              <span class="notification-type type-<%= com.rit.placement.util.XSSUtil.escape(notif.getType().toLowerCase()) %>">
+                <%= com.rit.placement.util.XSSUtil.escape(notif.getType().replace("_", " ")) %>
               </span>
             </div>
             
-            <div class="notification-message"><%= notif.getMessage() %></div>
+            <div class="notification-message"><%= com.rit.placement.util.XSSUtil.escape(notif.getMessage()) %></div>
             
             <div class="notification-footer">
               <div class="notification-time">
-                <%= dateFormat.format(notif.getCreatedAt()) %>
+                <%= com.rit.placement.util.XSSUtil.escape(dateFormat.format(notif.getCreatedAt())) %>
               </div>
               <% if (!notif.isRead()) { %>
-                <button class="mark-read-btn" onclick="markAsRead(<%= notif.getNotificationId() %>)">
+                <button class="mark-read-btn" onclick="markAsRead(<%= com.rit.placement.util.XSSUtil.escape(notif.getNotificationId()) %>)">
                   Mark as Read
                 </button>
               <% } %>

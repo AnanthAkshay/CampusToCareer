@@ -25,7 +25,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Jobs — <%= company != null ? company.getCompanyName() : "Company" %></title>
+  <title>Manage Jobs — <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company") %></title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -157,7 +157,7 @@
 </head>
 <body>
   <div class="navbar">
-    <h1>🏢 <%= company != null ? company.getCompanyName() : "Company Portal" %></h1>
+    <h1>🏢 <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company Portal") %></h1>
     <div>
       <a href="${pageContext.request.contextPath}/company/dashboard">Dashboard</a>
       <a href="${pageContext.request.contextPath}/company/applications">Applications</a>
@@ -167,41 +167,43 @@
 
   <div class="container">
     <% if (successMessage != null) { %>
-      <div class="alert alert-success"><%= successMessage %></div>
+      <div class="alert alert-success"><%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error"><%= errorMessage %></div>
+      <div class="alert alert-error"><%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <!-- Add/Edit Job Form -->
     <div class="section">
-      <h3><%= editJob != null ? "✏️ Edit Job Posting" : "➕ Post New Job" %></h3>
+      <h3><%= com.rit.placement.util.XSSUtil.escape(editJob != null ? "✏️ Edit Job Posting" : "➕ Post New Job") %></h3>
       <form method="post" action="${pageContext.request.contextPath}/company/jobs">
-        <input type="hidden" name="action" value="<%= editJob != null ? "update" : "add" %>">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
+        <input type="hidden" name="action" value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null ? "update" : "add") %>">
         <% if (editJob != null) { %>
-          <input type="hidden" name="job_id" value="<%= editJob.getJobId() %>">
+          <input type="hidden" name="job_id" value="<%= com.rit.placement.util.XSSUtil.escape(editJob.getJobId()) %>">
         <% } %>
         
         <div class="form-grid">
           <div class="form-group">
             <label>Job Role *</label>
             <input type="text" name="role" required 
-                   value="<%= editJob != null ? editJob.getRole() : "" %>">
+                   value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null ? editJob.getRole() : "") %>">
           </div>
           <div class="form-group">
             <label>Package (LPA) *</label>
             <input type="number" name="package" step="0.01" required 
-                   value="<%= editJob != null ? editJob.getPackageAmount() : "" %>">
+                   value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null ? editJob.getPackageAmount() : "") %>">
           </div>
           <div class="form-group">
             <label>Min CGPA *</label>
             <input type="number" name="min_cgpa" step="0.01" min="0" max="10" required 
-                   value="<%= editJob != null ? editJob.getMinCgpa() : "" %>">
+                   value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null ? editJob.getMinCgpa() : "") %>">
           </div>
           <div class="form-group">
             <label>Deadline *</label>
             <input type="date" name="deadline" required 
-                   value="<%= editJob != null && editJob.getDeadline() != null ? dateFormat.format(editJob.getDeadline()) : "" %>">
+                   value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null && editJob.getDeadline() != null ? dateFormat.format(editJob.getDeadline()) : "") %>">
           </div>
         </div>
         
@@ -209,17 +211,17 @@
           <div class="form-group">
             <label>Allowed Branches (comma-separated)</label>
             <input type="text" name="allowed_branches" placeholder="e.g., CSE, ISE, ECE" 
-                   value="<%= editJob != null && editJob.getAllowedBranches() != null ? editJob.getAllowedBranches() : "" %>">
+                   value="<%= com.rit.placement.util.XSSUtil.escape(editJob != null && editJob.getAllowedBranches() != null ? editJob.getAllowedBranches() : "") %>">
           </div>
           <div class="form-group">
             <label>Required Skills</label>
-            <textarea name="required_skills" placeholder="e.g., Java, Python, SQL"><%= editJob != null && editJob.getRequiredSkills() != null ? editJob.getRequiredSkills() : "" %></textarea>
+            <textarea name="required_skills" placeholder="e.g., Java, Python, SQL"><%= com.rit.placement.util.XSSUtil.escape(editJob != null && editJob.getRequiredSkills() != null ? editJob.getRequiredSkills() : "") %></textarea>
           </div>
         </div>
         
         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
           <button type="submit" class="btn btn-primary">
-            <%= editJob != null ? "Update Job" : "Post Job" %>
+            <%= com.rit.placement.util.XSSUtil.escape(editJob != null ? "Update Job" : "Post Job") %>
           </button>
           <% if (editJob != null) { %>
             <a href="${pageContext.request.contextPath}/company/jobs" class="btn btn-secondary">Cancel</a>
@@ -249,20 +251,20 @@
                                   !job.getDeadline().before(new java.sql.Date(System.currentTimeMillis()));
             %>
             <tr>
-              <td><strong><%= job.getRole() %></strong></td>
-              <td><%= job.getPackageAmount() %> LPA</td>
-              <td><%= job.getMinCgpa() %></td>
-              <td><%= job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A" %></td>
+              <td><strong><%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %></strong></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount()) %> LPA</td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa()) %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A") %></td>
               <td>
-                <span class="badge <%= isActive ? "badge-active" : "badge-expired" %>">
-                  <%= isActive ? "Active" : "Expired" %>
+                <span class="badge <%= com.rit.placement.util.XSSUtil.escape(isActive ? "badge-active" : "badge-expired") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(isActive ? "Active" : "Expired") %>
                 </span>
               </td>
               <td>
                 <div class="actions">
-                  <a href="${pageContext.request.contextPath}/company/jobs?action=edit&id=<%= job.getJobId() %>" 
+                  <a href="${pageContext.request.contextPath}/company/jobs?action=edit&id=<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>" 
                      class="btn btn-primary btn-small">Edit</a>
-                  <a href="${pageContext.request.contextPath}/company/jobs?action=delete&id=<%= job.getJobId() %>" 
+                  <a href="${pageContext.request.contextPath}/company/jobs?action=delete&id=<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>" 
                      class="btn btn-danger btn-small"
                      onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
                 </div>

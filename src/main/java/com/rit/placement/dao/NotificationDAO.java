@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.Notification;
 import com.rit.placement.util.DBConnection;
 
@@ -11,6 +14,7 @@ import java.util.List;
  * DAO for the 'notifications' table
  */
 public class NotificationDAO {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationDAO.class);
     
     /**
      * Create a new notification
@@ -54,10 +58,11 @@ public class NotificationDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            while (rs.next()) {
-                notifications.add(mapRow(rs));
+                while (rs.next()) {
+                    notifications.add(mapRow(rs));
+                }
             }
         }
         
@@ -74,10 +79,11 @@ public class NotificationDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            if (rs.next()) {
-                return rs.getInt(1);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         }
         

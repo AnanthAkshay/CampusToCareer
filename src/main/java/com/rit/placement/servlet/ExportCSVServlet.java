@@ -1,5 +1,8 @@
 package com.rit.placement.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.dao.ReportDAO;
 import com.rit.placement.model.User;
 import jakarta.servlet.ServletException;
@@ -20,6 +23,7 @@ import java.util.List;
  */
 @WebServlet("/admin/export/csv")
 public class ExportCSVServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(ExportCSVServlet.class);
     
     private final ReportDAO reportDAO = new ReportDAO();
     
@@ -79,8 +83,8 @@ public class ExportCSVServlet extends HttpServlet {
             System.out.println("CSV export successful: " + filename + " (" + students.size() + " records)");
             
         } catch (Exception e) {
-            System.err.println("Error exporting CSV: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error exporting CSV: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
                 "Failed to generate CSV report: " + e.getMessage());
         }

@@ -29,7 +29,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Company Dashboard — <%= company != null ? company.getCompanyName() : "Company" %></title>
+  <title>Company Dashboard — <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company") %></title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -158,9 +158,9 @@
 </head>
 <body>
   <div class="navbar">
-    <h1>🏢 <%= company != null ? company.getCompanyName() : "Company Portal" %></h1>
+    <h1>🏢 <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company Portal") %></h1>
     <div>
-      <span>Welcome, <strong><%= session.getAttribute("name") %></strong></span>
+      <span>Welcome, <strong><%= com.rit.placement.util.XSSUtil.escape(session.getAttribute("name")) %></strong></span>
       <a href="${pageContext.request.contextPath}/company/jobs">Manage Jobs</a>
       <a href="${pageContext.request.contextPath}/company/applications">Applications</a>
       <a href="${pageContext.request.contextPath}/company/interviews">Interviews</a>
@@ -171,34 +171,34 @@
   <div class="container">
     <div class="header">
       <h2>Company Dashboard</h2>
-      <p><%= company != null ? company.getDescription() : "" %></p>
+      <p><%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getDescription() : "") %></p>
     </div>
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Total Jobs Posted</div>
-        <div class="stat-value"><%= totalJobs != null ? totalJobs : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalJobs != null ? totalJobs : 0) %></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Active Jobs</div>
-        <div class="stat-value"><%= activeJobs != null ? activeJobs : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(activeJobs != null ? activeJobs : 0) %></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Applications</div>
-        <div class="stat-value"><%= totalApplications != null ? totalApplications : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalApplications != null ? totalApplications : 0) %></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Pending Review</div>
-        <div class="stat-value"><%= pendingApplications != null ? pendingApplications : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(pendingApplications != null ? pendingApplications : 0) %></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Shortlisted</div>
-        <div class="stat-value"><%= shortlistedApplications != null ? shortlistedApplications : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(shortlistedApplications != null ? shortlistedApplications : 0) %></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Selected</div>
-        <div class="stat-value"><%= selectedApplications != null ? selectedApplications : 0 %></div>
+        <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(selectedApplications != null ? selectedApplications : 0) %></div>
       </div>
     </div>
 
@@ -222,13 +222,13 @@
                                   !job.getDeadline().before(new java.sql.Date(System.currentTimeMillis()));
             %>
             <tr>
-              <td><strong><%= job.getRole() %></strong></td>
-              <td><%= job.getPackageAmount() %></td>
-              <td><%= job.getMinCgpa() %></td>
-              <td><%= job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A" %></td>
+              <td><strong><%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %></strong></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount()) %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa()) %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A") %></td>
               <td>
-                <span class="badge <%= isActive ? "badge-active" : "badge-expired" %>">
-                  <%= isActive ? "Active" : "Expired" %>
+                <span class="badge <%= com.rit.placement.util.XSSUtil.escape(isActive ? "badge-active" : "badge-expired") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(isActive ? "Active" : "Expired") %>
                 </span>
               </td>
             </tr>
@@ -260,13 +260,13 @@
           <tbody>
             <% for (Application app : applications) { %>
             <tr>
-              <td><%= app.getStudentName() != null ? app.getStudentName() : "N/A" %></td>
-              <td><%= app.getStudentUsn() != null ? app.getStudentUsn() : "N/A" %></td>
-              <td><%= app.getJobTitle() != null ? app.getJobTitle() : "N/A" %></td>
-              <td><%= app.getAppliedDate() != null ? dateFormat.format(app.getAppliedDate()) : "N/A" %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getStudentName() != null ? app.getStudentName() : "N/A") %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getStudentUsn() != null ? app.getStudentUsn() : "N/A") %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getJobTitle() != null ? app.getJobTitle() : "N/A") %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(app.getAppliedDate() != null ? dateFormat.format(app.getAppliedDate()) : "N/A") %></td>
               <td>
-                <span class="badge badge-<%= app.getStatus() != null ? app.getStatus().toLowerCase() : "pending" %>">
-                  <%= app.getStatus() != null ? app.getStatus() : "PENDING" %>
+                <span class="badge badge-<%= com.rit.placement.util.XSSUtil.escape(app.getStatus() != null ? app.getStatus().toLowerCase() : "pending") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(app.getStatus() != null ? app.getStatus() : "PENDING") %>
                 </span>
               </td>
             </tr>

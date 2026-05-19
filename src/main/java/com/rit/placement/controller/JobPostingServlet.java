@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.model.Company;
@@ -19,9 +24,10 @@ import java.util.List;
  */
 @WebServlet("/job-postings")
 public class JobPostingServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(JobPostingServlet.class);
 
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -35,8 +41,18 @@ public class JobPostingServlet extends HttpServlet {
         }
 
         try {
+            int page = 1;
+            int limit = 10;
+            String pageParam = req.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                page = Integer.parseInt(pageParam);
+            }
+            int offset = (page - 1) * limit;
+
             // 2. Fetch all job postings
-            List<JobPosting> jobPostings = jobPostingDAO.getAllJobPostings();
+            List<JobPosting> jobPostings = jobPostingDAO.getAllJobPostings(limit, offset);
+            req.setAttribute("currentPage", page);
+            req.setAttribute("limit", limit);
 
             // 3. Fetch all companies (for dropdown in form)
             List<Company> companies = companyDAO.getAllCompanies();
@@ -49,9 +65,9 @@ public class JobPostingServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/job_postings.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading job postings: " + e.getMessage());
+                "Error loading job postings.");
         }
     }
 
@@ -122,14 +138,14 @@ public class JobPostingServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/job-postings");
 
         } catch (NumberFormatException e) {
-            req.setAttribute("error", "Invalid number format: " + e.getMessage());
+            req.setAttribute("error", "Invalid number format.");
             doGet(req, resp);
         } catch (IllegalArgumentException e) {
             req.setAttribute("error", "Invalid date format. Use YYYY-MM-DD");
             doGet(req, resp);
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Error creating job posting: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            req.setAttribute("error", "Error creating job posting.");
             doGet(req, resp);
         }
     }

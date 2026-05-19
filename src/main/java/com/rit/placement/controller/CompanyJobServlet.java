@@ -1,5 +1,7 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.dao.UserDAO;
@@ -11,7 +13,7 @@ import com.rit.placement.model.Student;
 import com.rit.placement.service.NotificationService;
 import com.rit.placement.service.EligibilityService;
 import com.rit.placement.service.MetricsService;
-import com.rit.placement.util.CSRFUtil;
+
 import com.rit.placement.util.CGPACalculator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -40,10 +42,10 @@ public class CompanyJobServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(CompanyJobServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
     
-    private final UserDAO userDAO = new UserDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
     private final NotificationService notificationService = new NotificationService();
     private final EligibilityService eligibilityService = new EligibilityService();
     private final MetricsService metricsService = MetricsService.getInstance();
@@ -119,11 +121,7 @@ public class CompanyJobServlet extends HttpServlet {
             return;
         }
         
-        // 3. Validate CSRF token
-        if (!CSRFUtil.validateToken(req)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token. Please refresh the page and try again.");
-            return;
-        }
+
 
         try {
             // 4. Get company_id

@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.ProctorRemark;
 import com.rit.placement.util.DBConnection;
 
@@ -8,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProctorRemarkDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ProctorRemarkDAO.class);
     
     public boolean addRemark(int studentId, int proctorId, String remark) {
         // Security: Verify student belongs to this proctor via mapping table before adding remark
@@ -18,22 +22,23 @@ public class ProctorRemarkDAO {
              PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
             checkStmt.setInt(1, studentId);
             checkStmt.setInt(2, proctorId);
-            ResultSet rs = checkStmt.executeQuery();
+            try (ResultSet rs = checkStmt.executeQuery()) {
             
-            if (rs.next() && rs.getInt(1) > 0) {
-                try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
-                    insertStmt.setInt(1, studentId);
-                    insertStmt.setInt(2, proctorId);
-                    insertStmt.setString(3, remark);
-                    int rowsAffected = insertStmt.executeUpdate();
-                    return rowsAffected > 0;
+                if (rs.next() && rs.getInt(1) > 0) {
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setInt(1, studentId);
+                        insertStmt.setInt(2, proctorId);
+                        insertStmt.setString(3, remark);
+                        int rowsAffected = insertStmt.executeUpdate();
+                        return rowsAffected > 0;
+                    }
+                } else {
+                    logger.error("Security violation: Proctor " + proctorId + " attempted to add remark for unauthorized student " + studentId);
                 }
-            } else {
-                System.err.println("Security violation: Proctor " + proctorId + " attempted to add remark for unauthorized student " + studentId);
             }
         } catch (SQLException e) {
-            System.err.println("Error adding remark for student " + studentId + " by proctor " + proctorId + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error adding remark for student " + studentId + " by proctor " + proctorId + ": " + e.getMessage());
+            logger.error("Database error", e);
         }
         return false;
     }
@@ -50,20 +55,21 @@ public class ProctorRemarkDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, studentId);
             stmt.setInt(2, proctorId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                ProctorRemark remark = new ProctorRemark();
-                remark.setId(rs.getInt("id"));
-                remark.setStudentId(rs.getInt("student_id"));
-                remark.setProctorId(rs.getInt("proctor_id"));
-                remark.setRemark(rs.getString("remark"));
-                remark.setCreatedAt(rs.getTimestamp("created_at"));
-                remark.setProctorName(rs.getString("proctor_name"));
-                remarks.add(remark);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    ProctorRemark remark = new ProctorRemark();
+                    remark.setId(rs.getInt("id"));
+                    remark.setStudentId(rs.getInt("student_id"));
+                    remark.setProctorId(rs.getInt("proctor_id"));
+                    remark.setRemark(rs.getString("remark"));
+                    remark.setCreatedAt(rs.getTimestamp("created_at"));
+                    remark.setProctorName(rs.getString("proctor_name"));
+                    remarks.add(remark);
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching remarks for student " + studentId + " by proctor " + proctorId + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching remarks for student " + studentId + " by proctor " + proctorId + ": " + e.getMessage());
+            logger.error("Database error", e);
         }
         return remarks;
     }

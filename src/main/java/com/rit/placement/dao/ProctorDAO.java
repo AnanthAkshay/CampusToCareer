@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.StudentPerformance;
 import com.rit.placement.util.DBConnection;
 
@@ -8,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProctorDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ProctorDAO.class);
     
     public List<StudentPerformance> getStudentPerformance(int proctorId) {
         List<StudentPerformance> students = new ArrayList<>();
@@ -24,23 +28,24 @@ public class ProctorDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, proctorId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                StudentPerformance sp = new StudentPerformance();
-                sp.setStudentId(rs.getInt("user_id"));
-                sp.setUsn(rs.getString("usn"));
-                sp.setName(rs.getString("name"));
-                sp.setEmail(rs.getString("email"));
-                sp.setBranch(rs.getString("branch"));
-                sp.setSkills(rs.getString("skills"));
-                sp.setCgpa(rs.getDouble("cgpa"));
-                sp.setApplicationsCount(rs.getInt("app_count"));
-                sp.setPlaced(rs.getBoolean("is_placed"));
-                students.add(sp);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    StudentPerformance sp = new StudentPerformance();
+                    sp.setStudentId(rs.getInt("user_id"));
+                    sp.setUsn(rs.getString("usn"));
+                    sp.setName(rs.getString("name"));
+                    sp.setEmail(rs.getString("email"));
+                    sp.setBranch(rs.getString("branch"));
+                    sp.setSkills(rs.getString("skills"));
+                    sp.setCgpa(rs.getDouble("cgpa"));
+                    sp.setApplicationsCount(rs.getInt("app_count"));
+                    sp.setPlaced(rs.getBoolean("is_placed"));
+                    students.add(sp);
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching student performance for proctor " + proctorId + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching student performance for proctor " + proctorId + ": " + e.getMessage());
+            logger.error("Database error", e);
         }
         return students;
     }
@@ -59,23 +64,24 @@ public class ProctorDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, studentId);
             stmt.setInt(2, proctorId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                StudentPerformance sp = new StudentPerformance();
-                sp.setStudentId(rs.getInt("user_id"));
-                sp.setUsn(rs.getString("usn"));
-                sp.setName(rs.getString("name"));
-                sp.setEmail(rs.getString("email"));
-                sp.setBranch(rs.getString("branch"));
-                sp.setSkills(rs.getString("skills"));
-                sp.setCgpa(rs.getDouble("cgpa"));
-                sp.setApplicationsCount(rs.getInt("app_count"));
-                sp.setPlaced(rs.getBoolean("is_placed"));
-                return sp;
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    StudentPerformance sp = new StudentPerformance();
+                    sp.setStudentId(rs.getInt("user_id"));
+                    sp.setUsn(rs.getString("usn"));
+                    sp.setName(rs.getString("name"));
+                    sp.setEmail(rs.getString("email"));
+                    sp.setBranch(rs.getString("branch"));
+                    sp.setSkills(rs.getString("skills"));
+                    sp.setCgpa(rs.getDouble("cgpa"));
+                    sp.setApplicationsCount(rs.getInt("app_count"));
+                    sp.setPlaced(rs.getBoolean("is_placed"));
+                    return sp;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching student detail for student " + studentId + ", proctor " + proctorId + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching student detail for student " + studentId + ", proctor " + proctorId + ": " + e.getMessage());
+            logger.error("Database error", e);
         }
         return null;
     }
@@ -95,18 +101,19 @@ public class ProctorDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, proctorId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                com.rit.placement.model.Student student = new com.rit.placement.model.Student();
-                student.setStudentId(rs.getInt("user_id"));
-                student.setUsn(rs.getString("usn"));
-                student.setName(rs.getString("name"));
-                student.setEmail(rs.getString("email"));
-                student.setBranch(rs.getString("branch"));
-                student.setCurrentSem(rs.getInt("current_sem"));
-                student.setSkills(rs.getString("skills"));
-                student.setCgpa(rs.getDouble("cgpa"));
-                students.add(student);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    com.rit.placement.model.Student student = new com.rit.placement.model.Student();
+                    student.setStudentId(rs.getInt("user_id"));
+                    student.setUsn(rs.getString("usn"));
+                    student.setName(rs.getString("name"));
+                    student.setEmail(rs.getString("email"));
+                    student.setBranch(rs.getString("branch"));
+                    student.setCurrentSem(rs.getInt("current_sem"));
+                    student.setSkills(rs.getString("skills"));
+                    student.setCgpa(rs.getDouble("cgpa"));
+                    students.add(student);
+                }
             }
         }
         return students;

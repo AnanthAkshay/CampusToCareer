@@ -24,6 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     is_active     BOOLEAN DEFAULT TRUE,
     company_id    INT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    failed_login_attempts INT DEFAULT 0,
+    account_locked_until TIMESTAMP NULL,
     INDEX idx_users_role (role),
     INDEX idx_users_active (is_active),
     INDEX idx_users_company_id (company_id)
@@ -34,11 +36,24 @@ CREATE TABLE IF NOT EXISTS students (
     student_id  INT PRIMARY KEY,
     branch      VARCHAR(50) NOT NULL,
     current_sem INT NOT NULL,
-    skills      TEXT,
     projects    TEXT,
     experience  TEXT,
     updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 2a. Skills tables
+CREATE TABLE IF NOT EXISTS skills (
+    skill_id INT AUTO_INCREMENT PRIMARY KEY,
+    skill_name VARCHAR(100) UNIQUE NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS student_skills (
+    student_id INT NOT NULL,
+    skill_id INT NOT NULL,
+    PRIMARY KEY (student_id, skill_id),
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (skill_id) REFERENCES skills(skill_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- 3. Academic records (one row per semester per student)

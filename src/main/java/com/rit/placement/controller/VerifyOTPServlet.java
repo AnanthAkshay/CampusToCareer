@@ -128,8 +128,9 @@ public class VerifyOTPServlet extends HttpServlet {
         }
 
         // 10. OTP is valid - Create user session
-        // Clear old session and create new one for security
-        clearOTPSession(session);
+        // Clear old session and create new one for security (Session Fixation prevention)
+        session.invalidate();
+        session = req.getSession(true);
         
         // Set user session attributes
         session.setAttribute("user_id", userId);

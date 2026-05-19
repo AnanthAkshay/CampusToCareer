@@ -1,10 +1,12 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.*;
 import com.rit.placement.model.*;
 import com.rit.placement.service.NotificationService;
 import com.rit.placement.service.MetricsService;
-import com.rit.placement.util.CSRFUtil;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -26,11 +28,11 @@ public class CompanyInterviewServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(CompanyInterviewServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
     
-    private final UserDAO userDAO = new UserDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final InterviewDAO interviewDAO = new InterviewDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final InterviewDAO interviewDAO = DAOFactory.getInstance().getInterviewDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
     private final NotificationService notificationService = new NotificationService();
     private final MetricsService metricsService = MetricsService.getInstance();
 
@@ -74,7 +76,7 @@ public class CompanyInterviewServlet extends HttpServlet {
         } catch (Exception e) {
             logger.error("Error loading interviews for user {}", userId, e);
             metricsService.recordError();
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error: " + e.getMessage());
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error.");
         }
     }
 
@@ -96,11 +98,7 @@ public class CompanyInterviewServlet extends HttpServlet {
             return;
         }
         
-        // Validate CSRF token
-        if (!CSRFUtil.validateToken(req)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token. Please refresh the page and try again.");
-            return;
-        }
+
 
         try {
             User user = userDAO.getUserById(userId);
@@ -206,7 +204,7 @@ public class CompanyInterviewServlet extends HttpServlet {
             metricsService.recordError();
             
             HttpSession session2 = req.getSession();
-            session2.setAttribute("errorMessage", "Error: " + e.getMessage());
+            session2.setAttribute("errorMessage", "Error.");
             resp.sendRedirect(req.getContextPath() + "/company/interviews");
         }
     }

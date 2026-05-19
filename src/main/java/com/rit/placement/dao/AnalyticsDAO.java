@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.util.DBConnection;
 
 import java.sql.*;
@@ -11,6 +14,7 @@ import java.util.Map;
  * AnalyticsDAO provides aggregated data for placement intelligence dashboard
  */
 public class AnalyticsDAO {
+    private static final Logger logger = LoggerFactory.getLogger(AnalyticsDAO.class);
     
     /**
      * Get total count of students
@@ -24,8 +28,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting total students: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting total students: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -41,13 +45,14 @@ public class AnalyticsDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setDouble(1, minCgpa);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error counting eligible students: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting eligible students: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -64,8 +69,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting students applied: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting students applied: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -82,8 +87,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting students shortlisted: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting students shortlisted: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -100,8 +105,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting students placed: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting students placed: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -126,8 +131,8 @@ public class AnalyticsDAO {
                 result.put(rs.getString("company_name"), rs.getInt("app_count"));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching applications by company: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching applications by company: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return result;
     }
@@ -152,8 +157,8 @@ public class AnalyticsDAO {
                 result.put(rs.getString("month"), rs.getInt("placed_count"));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching monthly placements: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching monthly placements: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return result;
     }
@@ -174,8 +179,8 @@ public class AnalyticsDAO {
                 result.put(rs.getString("status"), rs.getInt("count"));
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching placement status breakdown: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching placement status breakdown: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return result;
     }
@@ -192,8 +197,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting total applications: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting total applications: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }
@@ -210,8 +215,8 @@ public class AnalyticsDAO {
                 return rs.getInt(1);
             }
         } catch (SQLException e) {
-            System.err.println("Error counting active jobs: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error counting active jobs: " + e.getMessage());
+            logger.error("Database error", e);
         }
         return 0;
     }

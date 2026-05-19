@@ -1,5 +1,10 @@
 package com.rit.placement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.model.Application;
@@ -21,9 +26,10 @@ import java.util.stream.Collectors;
  * Total Score: 0-100
  */
 public class CandidateRankingService {
+    private static final Logger logger = LoggerFactory.getLogger(CandidateRankingService.class);
     
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
     
     /**
      * Rank candidates for a specific job
@@ -58,7 +64,7 @@ public class CandidateRankingService {
                 rankedCandidates.add(ranked);
                 
             } catch (Exception e) {
-                System.err.println("Error ranking candidate " + app.getStudentId() + ": " + e.getMessage());
+                logger.error("Error ranking candidate " + app.getStudentId() + ": " + e.getMessage());
             }
         }
         

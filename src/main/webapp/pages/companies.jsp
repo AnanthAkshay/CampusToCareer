@@ -61,14 +61,14 @@
     <% if (successMessage != null) { %>
       <div class="alert alert-success" role="status" aria-live="polite">
         <span class="alert-icon">✓</span>
-        <%=successMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(successMessage) %>
       </div>
     <% } %>
     
     <% if (errorMessage != null) { %>
       <div class="alert alert-error">
         <span class="alert-icon">✕</span>
-        <%=errorMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %>
       </div>
     <% } %>
 
@@ -80,6 +80,8 @@
         <button class="btn-close" onclick="toggleAddForm()">✕</button>
       </div>
       <form action="${pageContext.request.contextPath}/companies" method="post" class="company-form">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
         <div class="form-row">
           <div class="form-group">
             <label for="company_name">Company Name <span class="required">*</span></label>
@@ -130,25 +132,25 @@
                   else if ("STARTUP".equals(company.getCompanyType())) icon = "🚀";
                   else if ("MNC".equals(company.getCompanyType())) icon = "🌐";
                 %>
-                <%=icon%>
+                <%= com.rit.placement.util.XSSUtil.escape(icon) %>
               </div>
               <div class="company-info">
-                <h3 class="company-name"><%=company.getCompanyName()%></h3>
-                <span class="company-type-badge badge-<%=company.getCompanyType().toLowerCase()%>">
-                  <%=company.getCompanyType()%>
+                <h3 class="company-name"><%= com.rit.placement.util.XSSUtil.escape(company.getCompanyName()) %></h3>
+                <span class="company-type-badge badge-<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyType().toLowerCase()) %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(company.getCompanyType()) %>
                 </span>
               </div>
             </div>
             
             <% if (company.getDescription() != null && !company.getDescription().isEmpty()) { %>
-              <p class="company-description"><%=company.getDescription()%></p>
+              <p class="company-description"><%= com.rit.placement.util.XSSUtil.escape(company.getDescription()) %></p>
             <% } else { %>
               <p class="company-description text-muted">No description available</p>
             <% } %>
             
             <div class="company-card-footer">
-              <span class="company-id">ID: <%=company.getCompanyId()%></span>
-              <a href="${pageContext.request.contextPath}/job-postings?company=<%=company.getCompanyId()%>" 
+              <span class="company-id">ID: <%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %></span>
+              <a href="${pageContext.request.contextPath}/job-postings?company=<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %>" 
                  class="btn-link">
                 View Jobs →
               </a>

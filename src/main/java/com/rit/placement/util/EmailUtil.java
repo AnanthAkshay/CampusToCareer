@@ -1,5 +1,8 @@
 package com.rit.placement.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
@@ -13,6 +16,7 @@ import java.util.Properties;
  * - TLS encryption enabled
  */
 public class EmailUtil {
+    private static final Logger logger = LoggerFactory.getLogger(EmailUtil.class);
 
     // Gmail SMTP Configuration - Using Environment Variables for Security
     private static final String SMTP_HOST = "smtp.gmail.com";
@@ -70,8 +74,8 @@ public class EmailUtil {
             return true;
 
         } catch (Exception e) {
-            System.err.println("Failed to send OTP email: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Failed to send OTP email: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             return false;
         }
     }
@@ -192,14 +196,14 @@ public class EmailUtil {
     public boolean sendEmail(String toEmail, String subject, String body) {
         // Validate environment variables are set
         if (SMTP_USERNAME == null || SMTP_PASSWORD == null || FROM_EMAIL == null) {
-            System.err.println("ERROR: SMTP credentials not configured. Please set environment variables:");
-            System.err.println("  SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL");
+            logger.error("ERROR: SMTP credentials not configured. Please set environment variables:");
+            logger.error("  SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL");
             return false;
         }
         
         // Validate email
         if (!isValidEmail(toEmail)) {
-            System.err.println("ERROR: Invalid email address: " + toEmail);
+            logger.error("ERROR: Invalid email address: " + toEmail);
             return false;
         }
 
@@ -227,8 +231,8 @@ public class EmailUtil {
             return true;
 
         } catch (Exception e) {
-            System.err.println("Failed to send email to " + toEmail + ": " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Failed to send email to " + toEmail + ": " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             
             // Log failure for retry/monitoring
             logEmailFailure(toEmail, subject, e.getMessage());
@@ -241,10 +245,10 @@ public class EmailUtil {
      */
     private void logEmailFailure(String toEmail, String subject, String error) {
         // In production, this would write to a database or log file for retry queue
-        System.err.println("EMAIL FAILURE LOG:");
-        System.err.println("  To: " + toEmail);
-        System.err.println("  Subject: " + subject);
-        System.err.println("  Error: " + error);
-        System.err.println("  Timestamp: " + new java.util.Date());
+        logger.error("EMAIL FAILURE LOG:");
+        logger.error("  To: " + toEmail);
+        logger.error("  Subject: " + subject);
+        logger.error("  Error: " + error);
+        logger.error("  Timestamp: " + new java.util.Date());
     }
 }

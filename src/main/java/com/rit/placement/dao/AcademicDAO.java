@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.AcademicRecord;
 import com.rit.placement.util.DBConnection;
 import java.sql.*;
@@ -10,6 +13,7 @@ import java.util.List;
  * DAO for the 'academic_records' table.
  */
 public class AcademicDAO {
+    private static final Logger logger = LoggerFactory.getLogger(AcademicDAO.class);
 
     /** Inserts one academic record (one semester SGPA for a student). */
     public void insertRecord(AcademicRecord r) throws SQLException {
@@ -31,14 +35,15 @@ public class AcademicDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, studentId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                AcademicRecord r = new AcademicRecord();
-                r.setRecordId(rs.getInt("record_id"));
-                r.setStudentId(rs.getInt("student_id"));
-                r.setSemester(rs.getInt("semester"));
-                r.setSgpa(rs.getDouble("sgpa"));
-                records.add(r);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AcademicRecord r = new AcademicRecord();
+                    r.setRecordId(rs.getInt("record_id"));
+                    r.setStudentId(rs.getInt("student_id"));
+                    r.setSemester(rs.getInt("semester"));
+                    r.setSgpa(rs.getDouble("sgpa"));
+                    records.add(r);
+                }
             }
         }
         return records;

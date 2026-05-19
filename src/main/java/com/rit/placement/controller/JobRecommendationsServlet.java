@@ -1,5 +1,8 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.service.JobRecommendationService;
 import com.rit.placement.service.JobRecommendationService.RecommendedJob;
 import jakarta.servlet.ServletException;
@@ -15,6 +18,7 @@ import java.util.List;
  */
 @WebServlet("/student/recommendations")
 public class JobRecommendationsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(JobRecommendationsServlet.class);
     
     private final JobRecommendationService recommendationService = new JobRecommendationService();
     
@@ -63,9 +67,9 @@ public class JobRecommendationsServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/job_recommendations.jsp").forward(req, resp);
             
         } catch (Exception e) {
-            System.err.println("ERROR in JobRecommendationsServlet: " + e.getMessage());
-            System.err.println("User ID: " + userId);
-            e.printStackTrace();
+            logger.error("ERROR in JobRecommendationsServlet.");
+            logger.error("User ID: " + userId);
+            logger.error("Exception occurred: ", e);
             
             req.setAttribute("error", "Unable to load recommendations. Please try again later.");
             req.getRequestDispatcher("/pages/error/generic_error.jsp").forward(req, resp);

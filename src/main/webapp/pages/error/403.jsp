@@ -69,9 +69,9 @@
         <div class="error-code">403</div>
         <h1 class="error-title">Access Denied</h1>
         <p class="error-message">
-            <%= request.getAttribute("errorMessage") != null 
+            <%= com.rit.placement.util.XSSUtil.escape(request.getAttribute("errorMessage") != null 
                 ? request.getAttribute("errorMessage") 
-                : "You don't have permission to access this resource." %>
+                : "You don't have permission to access this resource.") %>
         </p>
         <div class="error-actions">
             <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>

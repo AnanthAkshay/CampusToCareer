@@ -14,6 +14,10 @@
   Integer pendingApplications = (Integer) request.getAttribute("pendingApplications");
   Integer activeJobs = (Integer) request.getAttribute("activeJobs");
   String branchData = (String) request.getAttribute("branchData");
+  Integer shortlistedApps = (Integer) request.getAttribute("shortlistedApps");
+  Integer interviewApps = (Integer) request.getAttribute("interviewApps");
+  Integer selectedApps = (Integer) request.getAttribute("selectedApps");
+  Integer rejectedApps = (Integer) request.getAttribute("rejectedApps");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +46,7 @@
         <div class="stat-icon">👥</div>
         <div class="stat-content">
           <div class="stat-label">Total Students</div>
-          <div class="stat-value"><%=totalStudents != null ? totalStudents : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalStudents != null ? totalStudents : 0) %></div>
         </div>
       </div>
 
@@ -50,9 +54,9 @@
         <div class="stat-icon">📝</div>
         <div class="stat-content">
           <div class="stat-label">Total Applications</div>
-          <div class="stat-value"><%=totalApplications != null ? totalApplications : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalApplications != null ? totalApplications : 0) %></div>
           <div class="stat-trend">
-            <span class="trend-indicator"><%=pendingApplications != null ? pendingApplications : 0%> pending</span>
+            <span class="trend-indicator"><%= com.rit.placement.util.XSSUtil.escape(pendingApplications != null ? pendingApplications : 0) %> pending</span>
           </div>
         </div>
       </div>
@@ -61,7 +65,7 @@
         <div class="stat-icon">🏢</div>
         <div class="stat-content">
           <div class="stat-label">Companies</div>
-          <div class="stat-value"><%=totalCompanies != null ? totalCompanies : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalCompanies != null ? totalCompanies : 0) %></div>
         </div>
       </div>
 
@@ -69,9 +73,9 @@
         <div class="stat-icon">💼</div>
         <div class="stat-content">
           <div class="stat-label">Job Postings</div>
-          <div class="stat-value"><%=totalJobs != null ? totalJobs : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalJobs != null ? totalJobs : 0) %></div>
           <div class="stat-trend">
-            <span class="trend-indicator"><%=activeJobs != null ? activeJobs : 0%> active</span>
+            <span class="trend-indicator"><%= com.rit.placement.util.XSSUtil.escape(activeJobs != null ? activeJobs : 0) %> active</span>
           </div>
         </div>
       </div>
@@ -80,7 +84,7 @@
         <div class="stat-icon">🎉</div>
         <div class="stat-content">
           <div class="stat-label">Selected Students</div>
-          <div class="stat-value"><%=selectedStudents != null ? selectedStudents : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(selectedStudents != null ? selectedStudents : 0) %></div>
         </div>
       </div>
 
@@ -88,7 +92,7 @@
         <div class="stat-icon">✓</div>
         <div class="stat-content">
           <div class="stat-label">Shortlisted</div>
-          <div class="stat-value"><%=shortlistedStudents != null ? shortlistedStudents : 0%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(shortlistedStudents != null ? shortlistedStudents : 0) %></div>
         </div>
       </div>
     </div>
@@ -163,7 +167,7 @@
     });
 
     // Branch-wise placements chart
-    const branchData = <%=branchData != null ? branchData : "[]"%>;
+    const branchData = <%= branchData != null ? branchData : "[]" %>;
     const branchLabels = branchData.map(d => d.branch);
     const branchCounts = branchData.map(d => d.count);
 
@@ -195,18 +199,19 @@
     new Chart(document.getElementById('statusChart'), {
       type: 'doughnut',
       data: {
-        labels: ['Pending', 'Shortlisted', 'Selected', 'Rejected'],
+        labels: ['Pending', 'Shortlisted', 'Interview', 'Selected', 'Rejected'],
         datasets: [{
           data: [
-            <%=pendingApplications != null ? pendingApplications : 0%>,
-            <%=shortlistedStudents != null ? shortlistedStudents : 0%>,
-            <%=selectedStudents != null ? selectedStudents : 0%>,
-            <%=(totalApplications != null && pendingApplications != null && shortlistedStudents != null && selectedStudents != null) ? 
-               (totalApplications - pendingApplications - shortlistedStudents - selectedStudents) : 0%>
+            <%= pendingApplications != null ? pendingApplications : 0 %>,
+            <%= shortlistedApps != null ? shortlistedApps : 0 %>,
+            <%= interviewApps != null ? interviewApps : 0 %>,
+            <%= selectedApps != null ? selectedApps : 0 %>,
+            <%= rejectedApps != null ? rejectedApps : 0 %>
           ],
           backgroundColor: [
             'rgba(251, 191, 36, 0.8)',
             'rgba(14, 165, 233, 0.8)',
+            'rgba(168, 85, 247, 0.8)',
             'rgba(34, 197, 94, 0.8)',
             'rgba(239, 68, 68, 0.8)'
           ]
@@ -228,9 +233,9 @@
         datasets: [{
           label: 'Placements',
           data: [
-            <%=selectedStudents != null && selectedStudents > 0 ? Math.max(1, selectedStudents - 15) : 0%>,
-            <%=selectedStudents != null && selectedStudents > 0 ? Math.max(1, selectedStudents - 8) : 0%>,
-            <%=selectedStudents != null ? selectedStudents : 0%>
+            <%= com.rit.placement.util.XSSUtil.escape(selectedStudents != null && selectedStudents > 0 ? Math.max(1, selectedStudents - 15) : 0) %>,
+            <%= com.rit.placement.util.XSSUtil.escape(selectedStudents != null && selectedStudents > 0 ? Math.max(1, selectedStudents - 8) : 0) %>,
+            <%= com.rit.placement.util.XSSUtil.escape(selectedStudents != null ? selectedStudents : 0) %>
           ],
           borderColor: 'rgba(59, 130, 246, 1)',
           backgroundColor: 'rgba(59, 130, 246, 0.1)',

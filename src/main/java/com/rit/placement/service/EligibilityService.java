@@ -1,5 +1,7 @@
 package com.rit.placement.service;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.model.JobPosting;
@@ -20,8 +22,8 @@ import java.util.Set;
  */
 public class EligibilityService {
 
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
 
     /**
      * Check if a student is eligible for a specific job posting.
@@ -51,6 +53,22 @@ public class EligibilityService {
             return false;
         }
 
+        return isEligible(student, cgpa, job);
+    }
+
+    /**
+     * Check if a student is eligible for a specific job posting (optimized memory version).
+     * 
+     * @param student the student object
+     * @param cgpa the calculated CGPA
+     * @param job the job posting
+     * @return true if eligible, false otherwise
+     */
+    public boolean isEligible(Student student, double cgpa, JobPosting job) {
+        if (student == null || job == null || cgpa < 0) {
+            return false;
+        }
+
         // 4. Check CGPA eligibility
         if (!checkCGPAEligibility(cgpa, job)) {
             return false;
@@ -62,7 +80,7 @@ public class EligibilityService {
         }
 
         // 6. Check skills overlap (optional - if job has required skills)
-        if (!checkSkillsEligibility(student.getSkills(), job)) {
+        if (!checkSkillsEligibility(student.getStudentId(), job)) {
             return false;
         }
 
@@ -84,73 +102,29 @@ public class EligibilityService {
      */
     private boolean checkBranchEligibility(String studentBranch, JobPosting job) {
         String allowedBranches = job.getAllowedBranches();
-        
-        // If no branch restriction, all branches are eligible
         if (allowedBranches == null || allowedBranches.trim().isEmpty()) {
             return true;
         }
-
-        // Normalize and check if student's branch is in the allowed list
-        String normalizedStudentBranch = studentBranch.trim().toUpperCase();
-        String normalizedAllowedBranches = allowedBranches.toUpperCase();
-        
-        // Split by comma and check each branch
-        String[] branches = normalizedAllowedBranches.split(",");
-        for (String branch : branches) {
-            if (branch.trim().equals(normalizedStudentBranch)) {
-                return true;
-            }
+        try {
+            return jobPostingDAO.hasAllowedBranch(job.getJobId(), studentBranch);
+        } catch (SQLException e) {
+            return false;
         }
-        
-        return false;
     }
 
     /**
      * Check if student's skills overlap with required skills.
-     * Basic matching: at least one skill must match.
      */
-    private boolean checkSkillsEligibility(String studentSkills, JobPosting job) {
+    private boolean checkSkillsEligibility(int studentId, JobPosting job) {
         String requiredSkills = job.getRequiredSkills();
-        
-        // If no skills required, student is eligible
         if (requiredSkills == null || requiredSkills.trim().isEmpty()) {
             return true;
         }
-
-        // If student has no skills but job requires skills, not eligible
-        if (studentSkills == null || studentSkills.trim().isEmpty()) {
+        try {
+            return jobPostingDAO.hasOverlappingSkills(job.getJobId(), studentId);
+        } catch (SQLException e) {
             return false;
         }
-
-        // Normalize and create sets for comparison
-        Set<String> studentSkillSet = normalizeSkills(studentSkills);
-        Set<String> requiredSkillSet = normalizeSkills(requiredSkills);
-
-        // Check if there's any overlap (at least one matching skill)
-        for (String skill : studentSkillSet) {
-            if (requiredSkillSet.contains(skill)) {
-                return true; // At least one skill matches
-            }
-        }
-
-        return false; // No matching skills
-    }
-
-    /**
-     * Normalize skills string into a set of lowercase, trimmed skills.
-     */
-    private Set<String> normalizeSkills(String skills) {
-        Set<String> skillSet = new HashSet<>();
-        if (skills != null && !skills.trim().isEmpty()) {
-            String[] skillArray = skills.split(",");
-            for (String skill : skillArray) {
-                String normalized = skill.trim().toLowerCase();
-                if (!normalized.isEmpty()) {
-                    skillSet.add(normalized);
-                }
-            }
-        }
-        return skillSet;
     }
 
     /**
@@ -185,7 +159,7 @@ public class EligibilityService {
         // Check each criterion
         boolean cgpaEligible = checkCGPAEligibility(cgpa, job);
         boolean branchEligible = checkBranchEligibility(student.getBranch(), job);
-        boolean skillsEligible = checkSkillsEligibility(student.getSkills(), job);
+        boolean skillsEligible = checkSkillsEligibility(student.getStudentId(), job);
 
         result.setCgpaEligible(cgpaEligible);
         result.setBranchEligible(branchEligible);

@@ -259,7 +259,7 @@
   <div class="container">
     <div class="header">
       <h2>Personalized Job Recommendations</h2>
-      <p>Based on your CGPA, skills, and profile — <%= totalRecommendations %> jobs matched</p>
+      <p>Based on your CGPA, skills, and profile — <%= com.rit.placement.util.XSSUtil.escape(totalRecommendations) %> jobs matched</p>
     </div>
 
     <div class="info-banner">
@@ -276,15 +276,15 @@
           <div class="recommendation-card">
             <div class="card-header">
               <div>
-                <div class="job-title"><%= rec.getJob().getRole() %></div>
-                <div class="company-name"><%= rec.getJob().getCompanyName() %></div>
+                <div class="job-title"><%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getRole()) %></div>
+                <div class="company-name"><%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getCompanyName()) %></div>
               </div>
               <div class="match-score">
-                <div class="score-value" style="color: <%= rec.getScoreColor() %>">
-                  <%= rec.getScore() %>
+                <div class="score-value" style="color: <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreColor()) %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(rec.getScore()) %>
                 </div>
-                <div class="score-label" style="color: <%= rec.getScoreColor() %>">
-                  <%= rec.getScoreLabel() %>
+                <div class="score-label" style="color: <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreColor()) %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreLabel()) %>
                 </div>
               </div>
             </div>
@@ -293,21 +293,21 @@
               <% if (rec.getJob().getPackageAmount() != null) { %>
               <div class="detail-item">
                 <div class="detail-label">Package</div>
-                <div class="detail-value">₹<%= rec.getJob().getPackageAmount() %> LPA</div>
+                <div class="detail-value">₹<%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getPackageAmount()) %> LPA</div>
               </div>
               <% } %>
               
               <% if (rec.getJob().getMinCgpa() != null) { %>
               <div class="detail-item">
                 <div class="detail-label">Min CGPA</div>
-                <div class="detail-value"><%= rec.getJob().getMinCgpa() %></div>
+                <div class="detail-value"><%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getMinCgpa()) %></div>
               </div>
               <% } %>
               
               <% if (rec.getJob().getDeadline() != null) { %>
               <div class="detail-item">
                 <div class="detail-label">Deadline</div>
-                <div class="detail-value"><%= dateFormat.format(rec.getJob().getDeadline()) %></div>
+                <div class="detail-value"><%= com.rit.placement.util.XSSUtil.escape(dateFormat.format(rec.getJob().getDeadline())) %></div>
               </div>
               <% } %>
             </div>
@@ -319,7 +319,7 @@
                 <% for (String reason : rec.getReasons()) { %>
                 <div class="reason-item">
                   <div class="reason-icon">✓</div>
-                  <div><%= reason %></div>
+                  <div><%= com.rit.placement.util.XSSUtil.escape(reason) %></div>
                 </div>
                 <% } %>
               </div>
@@ -327,7 +327,9 @@
             <% } %>
 
             <form method="post" action="${pageContext.request.contextPath}/apply">
-              <input type="hidden" name="job_id" value="<%= rec.getJob().getJobId() %>">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
+              <input type="hidden" name="job_id" value="<%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getJobId()) %>">
               <button type="submit" class="apply-button">Apply Now →</button>
             </form>
           </div>

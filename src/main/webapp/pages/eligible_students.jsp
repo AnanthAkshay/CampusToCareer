@@ -50,7 +50,7 @@
         <h1 class="page-title">Eligible Students 🎯</h1>
         <p class="page-subtitle">
           <% if (job != null) { %>
-            <%=job.getRole()%> at <%=job.getCompanyName()%>
+            <%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %> at <%= com.rit.placement.util.XSSUtil.escape(job.getCompanyName()) %>
           <% } %>
         </p>
       </div>
@@ -71,27 +71,27 @@
         <div class="requirement-item">
           <span class="requirement-label">Min CGPA:</span>
           <span class="requirement-value">
-            <%= job.getMinCgpa() != null ? job.getMinCgpa() : "N/A" %>
+            <%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa() != null ? job.getMinCgpa() : "N/A") %>
           </span>
         </div>
         <div class="requirement-item">
           <span class="requirement-label">Allowed Branches:</span>
           <span class="requirement-value">
-            <%= job.getAllowedBranches() != null && !job.getAllowedBranches().isEmpty() 
-                ? job.getAllowedBranches() : "All Branches" %>
+            <%= com.rit.placement.util.XSSUtil.escape(job.getAllowedBranches() != null && !job.getAllowedBranches().isEmpty() 
+                ? job.getAllowedBranches() : "All Branches") %>
           </span>
         </div>
         <div class="requirement-item">
           <span class="requirement-label">Required Skills:</span>
           <span class="requirement-value">
-            <%= job.getRequiredSkills() != null && !job.getRequiredSkills().isEmpty() 
-                ? job.getRequiredSkills() : "Not specified" %>
+            <%= com.rit.placement.util.XSSUtil.escape(job.getRequiredSkills() != null && !job.getRequiredSkills().isEmpty() 
+                ? job.getRequiredSkills() : "Not specified") %>
           </span>
         </div>
         <div class="requirement-item">
           <span class="requirement-label">Package:</span>
           <span class="requirement-value">
-            <%= job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed" %>
+            <%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed") %>
           </span>
         </div>
       </div>
@@ -104,7 +104,7 @@
         <div class="stat-icon">👥</div>
         <div class="stat-content">
           <div class="stat-label">Total Students</div>
-          <div class="stat-value"><%=totalStudents%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(totalStudents) %></div>
         </div>
       </div>
 
@@ -112,9 +112,9 @@
         <div class="stat-icon">✓</div>
         <div class="stat-content">
           <div class="stat-label">Eligible Students</div>
-          <div class="stat-value"><%=eligibleCount%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(eligibleCount) %></div>
           <div class="stat-trend">
-            <span class="trend-indicator"><%=String.format("%.1f", eligibilityPercentage)%>% of total</span>
+            <span class="trend-indicator"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.1f", eligibilityPercentage)) %>% of total</span>
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@
         <div class="stat-icon">✕</div>
         <div class="stat-content">
           <div class="stat-label">Not Eligible</div>
-          <div class="stat-value"><%=ineligibleCount%></div>
+          <div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(ineligibleCount) %></div>
         </div>
       </div>
     </div>
@@ -131,13 +131,13 @@
     <!-- Filter Tabs -->
     <div class="filter-tabs">
       <button class="filter-tab active" onclick="showTab('eligible')">
-        ✓ Eligible (<%=eligibleCount%>)
+        ✓ Eligible (<%= com.rit.placement.util.XSSUtil.escape(eligibleCount) %>)
       </button>
       <button class="filter-tab" onclick="showTab('ineligible')">
-        ✕ Not Eligible (<%=ineligibleCount%>)
+        ✕ Not Eligible (<%= com.rit.placement.util.XSSUtil.escape(ineligibleCount) %>)
       </button>
       <button class="filter-tab" onclick="showTab('all')">
-        👥 All Students (<%=totalStudents%>)
+        👥 All Students (<%= com.rit.placement.util.XSSUtil.escape(totalStudents) %>)
       </button>
     </div>
 
@@ -158,11 +158,11 @@
             <tbody>
               <% for (StudentEligibility student : eligibleStudents) { %>
                 <tr class="student-row eligible-row">
-                  <td class="usn-cell"><%=student.getUsn()%></td>
-                  <td class="name-cell"><%=student.getName()%></td>
-                  <td class="branch-cell"><%=student.getBranch()%></td>
+                  <td class="usn-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></td>
+                  <td class="name-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                  <td class="branch-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
                   <td class="cgpa-cell">
-                    <span class="cgpa-badge"><%=String.format("%.2f", student.getCgpa())%></span>
+                    <span class="cgpa-badge"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", student.getCgpa())) %></span>
                   </td>
                   <td class="status-cell">
                     <span class="badge badge-success">✓ Eligible</span>
@@ -198,11 +198,11 @@
             <tbody>
               <% for (StudentEligibility student : ineligibleStudents) { %>
                 <tr class="student-row ineligible-row">
-                  <td class="usn-cell"><%=student.getUsn()%></td>
-                  <td class="name-cell"><%=student.getName()%></td>
-                  <td class="branch-cell"><%=student.getBranch()%></td>
+                  <td class="usn-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></td>
+                  <td class="name-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                  <td class="branch-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
                   <td class="cgpa-cell">
-                    <span class="cgpa-badge"><%=String.format("%.2f", student.getCgpa())%></span>
+                    <span class="cgpa-badge"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", student.getCgpa())) %></span>
                   </td>
                   <td class="status-cell">
                     <span class="badge badge-danger">✕ Not Eligible</span>
@@ -240,11 +240,11 @@
               <% if (eligibleStudents != null) {
                    for (StudentEligibility student : eligibleStudents) { %>
                 <tr class="student-row eligible-row">
-                  <td class="usn-cell"><%=student.getUsn()%></td>
-                  <td class="name-cell"><%=student.getName()%></td>
-                  <td class="branch-cell"><%=student.getBranch()%></td>
+                  <td class="usn-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></td>
+                  <td class="name-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                  <td class="branch-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
                   <td class="cgpa-cell">
-                    <span class="cgpa-badge"><%=String.format("%.2f", student.getCgpa())%></span>
+                    <span class="cgpa-badge"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", student.getCgpa())) %></span>
                   </td>
                   <td class="status-cell">
                     <span class="badge badge-success">✓ Eligible</span>
@@ -255,11 +255,11 @@
               <% if (ineligibleStudents != null) {
                    for (StudentEligibility student : ineligibleStudents) { %>
                 <tr class="student-row ineligible-row">
-                  <td class="usn-cell"><%=student.getUsn()%></td>
-                  <td class="name-cell"><%=student.getName()%></td>
-                  <td class="branch-cell"><%=student.getBranch()%></td>
+                  <td class="usn-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></td>
+                  <td class="name-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                  <td class="branch-cell"><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
                   <td class="cgpa-cell">
-                    <span class="cgpa-badge"><%=String.format("%.2f", student.getCgpa())%></span>
+                    <span class="cgpa-badge"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", student.getCgpa())) %></span>
                   </td>
                   <td class="status-cell">
                     <span class="badge badge-danger">✕ Not Eligible</span>

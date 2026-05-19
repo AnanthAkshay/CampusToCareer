@@ -1,5 +1,8 @@
 package com.rit.placement.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.dao.AnalyticsDAO;
 import com.rit.placement.model.User;
 
@@ -14,6 +17,7 @@ import java.util.Map;
  */
 @WebServlet("/admin/analytics")
 public class CoordinatorAnalyticsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(CoordinatorAnalyticsServlet.class);
     private AnalyticsDAO analyticsDAO = new AnalyticsDAO();
     
     @Override
@@ -77,8 +81,8 @@ public class CoordinatorAnalyticsServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/admin/admin_analytics.jsp").forward(request, response);
             
         } catch (Exception e) {
-            System.err.println("Error loading analytics dashboard: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error loading analytics dashboard: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             request.setAttribute("error", "Failed to load analytics data. Please try again.");
             request.getRequestDispatcher("/WEB-INF/views/admin/admin_analytics.jsp").forward(request, response);
         }

@@ -1,5 +1,7 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.UserDAO;
 import com.rit.placement.model.User;
 import com.rit.placement.service.MetricsService;
@@ -19,7 +21,7 @@ public class LoginServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
-    private final UserDAO userDAO = new UserDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
     private final MetricsService metricsService = MetricsService.getInstance();
 
     /** GET redirects to unified login page */
@@ -69,6 +71,12 @@ public class LoginServlet extends HttpServlet {
                 return;
             }
 
+            // Prevent Session Fixation
+            HttpSession oldSession = req.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+            
             // Create user session
             HttpSession session = req.getSession(true);
             session.setAttribute("user_id", user.getUserId());
@@ -92,10 +100,14 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("successMessage", "Login successful! Welcome, " + user.getName());
             resp.sendRedirect(req.getContextPath() + dashboardPath);
 
+        } catch (SecurityException se) {
+            logger.warn("Account lockout for USN: {} from IP: {}", usn, clientIp);
+            req.getSession().setAttribute("errorMessage", se.getMessage());
+            resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
         } catch (Exception e) {
             logger.error("Error during password login for USN: {} from IP: {}", usn, clientIp, e);
             metricsService.recordError();
-            req.getSession().setAttribute("errorMessage", "Error processing login: " + e.getMessage());
+            req.getSession().setAttribute("errorMessage", "Error processing login.");
             resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
         }
     }

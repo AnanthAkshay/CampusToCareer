@@ -1,32 +1,34 @@
 package com.rit.placement.util;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
  * JDBC connection utility (Docker-ready + production-safe).
- *
- * Requires environment variables:
- * DB_URL, DB_USER, DB_PASSWORD
+ * Uses HikariCP for connection pooling.
+ * Requires environment variables: DB_URL, DB_USER, DB_PASSWORD
  */
 public class DBConnection {
 
-    private static final String URL;
-    private static final String USER;
-    private static final String PASS;
+    private static final HikariDataSource dataSource;
 
     static {
-        // 🔒 Strict environment-based configuration (no fallback)
-        URL = getEnv("DB_URL");
-        USER = getEnv("DB_USER");
-        PASS = getEnv("DB_PASSWORD");
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(getEnv("DB_URL"));
+        config.setUsername(getEnv("DB_USER"));
+        config.setPassword(getEnv("DB_PASSWORD"));
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+        
+        // HikariCP recommended settings
+        config.setMaximumPoolSize(20);
+        config.setMinimumIdle(5);
+        config.setIdleTimeout(300000);
+        config.setConnectionTimeout(20000);
 
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL JDBC Driver not found.", e);
-        }
+        dataSource = new HikariDataSource(config);
     }
 
     private DBConnection() {
@@ -42,11 +44,20 @@ public class DBConnection {
     }
 
     /**
-     * Get a new DB connection.
+     * Get a connection from the HikariCP pool.
      * Always use try-with-resources while calling.
      */
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASS);
+        return dataSource.getConnection();
+    }
+
+    /**
+     * Shut down the connection pool (call during application shutdown)
+     */
+    public static void closePool() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+        }
     }
 
     /**
@@ -54,9 +65,11 @@ public class DBConnection {
      */
     public static void main(String[] args) {
         try (Connection conn = getConnection()) {
-            System.out.println("✅ DB Connected Successfully");
+            System.out.println("✅ DB Connected Successfully via HikariCP");
         } catch (Exception e) {
             System.out.println("❌ DB Connection Failed: " + e.getMessage());
+        } finally {
+            closePool();
         }
     }
 }

@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.DocumentDAO;
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.dao.UserDAO;
@@ -18,10 +23,11 @@ import java.io.IOException;
  */
 @WebServlet("/student/profile")
 public class ProfileServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(ProfileServlet.class);
 
-    private final UserDAO userDAO = new UserDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final DocumentDAO documentDAO = new DocumentDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final DocumentDAO documentDAO = DAOFactory.getInstance().getDocumentDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -75,9 +81,9 @@ public class ProfileServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/profile.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, 
-                "Error loading profile: " + e.getMessage());
+                "Error loading profile.");
         }
     }
 
@@ -108,9 +114,14 @@ public class ProfileServlet extends HttpServlet {
             String experience = req.getParameter("experience");
 
             // 4. Validate and sanitize input
-            skills = sanitize(skills);
-            projects = sanitize(projects);
-            experience = sanitize(experience);
+            // 4. Validate and sanitize input using central validation layer
+            skills = com.rit.placement.util.ValidationUtil.sanitizeString(skills, 1000);
+            projects = com.rit.placement.util.ValidationUtil.sanitizeString(projects, 2000);
+            experience = com.rit.placement.util.ValidationUtil.sanitizeString(experience, 2000);
+            
+            if (!com.rit.placement.util.ValidationUtil.isAlphaNumericWithPunctuation(skills)) {
+                throw new IllegalArgumentException("Skills contain invalid characters.");
+            }
 
             // Validation: At least one field must be non-empty
             if (isEmpty(skills) && isEmpty(projects) && isEmpty(experience)) {
@@ -127,8 +138,8 @@ public class ProfileServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/student/profile");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("error", "Error updating profile: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            req.setAttribute("error", "Error updating profile.");
             doGet(req, resp);
         }
     }

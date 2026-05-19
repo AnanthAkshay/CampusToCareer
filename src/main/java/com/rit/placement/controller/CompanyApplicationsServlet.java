@@ -1,5 +1,7 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
@@ -15,7 +17,7 @@ import com.rit.placement.service.CandidateRankingService;
 import com.rit.placement.service.CandidateRankingService.RankedCandidate;
 import com.rit.placement.service.MetricsService;
 import com.rit.placement.util.CGPACalculator;
-import com.rit.placement.util.CSRFUtil;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -44,11 +46,11 @@ public class CompanyApplicationsServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(CompanyApplicationsServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
     
-    private final UserDAO userDAO = new UserDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
     private final NotificationService notificationService = new NotificationService();
     private final CandidateRankingService rankingService = new CandidateRankingService();
     private final MetricsService metricsService = MetricsService.getInstance();
@@ -259,11 +261,7 @@ public class CompanyApplicationsServlet extends HttpServlet {
             return;
         }
         
-        // 3. Validate CSRF token
-        if (!CSRFUtil.validateToken(req)) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid CSRF token. Please refresh the page and try again.");
-            return;
-        }
+
 
         try {
             // 4. Get company_id

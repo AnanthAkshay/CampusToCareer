@@ -214,7 +214,7 @@
         <div class="header">
             <h1>🎓 Proctor Dashboard</h1>
             <div class="user-info">
-                <span class="user-name">Welcome, <strong><%= proctorName %></strong></span>
+                <span class="user-name">Welcome, <strong><%= com.rit.placement.util.XSSUtil.escape(proctorName) %></strong></span>
                 <a href="<%= request.getContextPath() %>/logout" class="logout-btn">Logout</a>
             </div>
         </div>
@@ -222,7 +222,7 @@
         <!-- Stats Card -->
         <div class="stats-card">
             <h2>Total Assigned Students</h2>
-            <div class="count"><%= studentCount %></div>
+            <div class="count"><%= com.rit.placement.util.XSSUtil.escape(studentCount) %></div>
         </div>
 
         <!-- Students Section -->
@@ -252,17 +252,17 @@
                                                    cgpa >= 6.0 ? "cgpa-medium" : "cgpa-low";
                             %>
                             <tr>
-                                <td><%= index++ %></td>
-                                <td><strong><%= student.getUsn() %></strong></td>
-                                <td><%= student.getName() %></td>
-                                <td><%= student.getBranch() %></td>
-                                <td><%= student.getCurrentSem() %></td>
+                                <td><%= com.rit.placement.util.XSSUtil.escape(index++) %></td>
+                                <td><strong><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></strong></td>
+                                <td><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                                <td><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
+                                <td><%= com.rit.placement.util.XSSUtil.escape(student.getCurrentSem()) %></td>
                                 <td>
-                                    <span class="cgpa-badge <%= cgpaClass %>">
-                                        <%= String.format("%.2f", cgpa) %>
+                                    <span class="cgpa-badge <%= com.rit.placement.util.XSSUtil.escape(cgpaClass) %>">
+                                        <%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", cgpa)) %>
                                     </span>
                                 </td>
-                                <td><%= student.getEmail() != null ? student.getEmail() : "N/A" %></td>
+                                <td><%= com.rit.placement.util.XSSUtil.escape(student.getEmail() != null ? student.getEmail() : "N/A") %></td>
                             </tr>
                             <% } %>
                         </tbody>

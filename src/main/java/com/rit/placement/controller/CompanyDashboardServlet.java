@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
@@ -26,11 +31,12 @@ import java.util.List;
  */
 @WebServlet("/company/dashboard")
 public class CompanyDashboardServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(CompanyDashboardServlet.class);
 
-    private final UserDAO userDAO = new UserDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -116,9 +122,9 @@ public class CompanyDashboardServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/company_dashboard.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading company dashboard: " + e.getMessage());
+                "Error loading company dashboard.");
         }
     }
 }

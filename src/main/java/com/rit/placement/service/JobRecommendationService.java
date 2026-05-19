@@ -1,5 +1,10 @@
 package com.rit.placement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.dao.StudentDAO;
@@ -23,10 +28,11 @@ import java.util.stream.Collectors;
  * Score: 0-100
  */
 public class JobRecommendationService {
+    private static final Logger logger = LoggerFactory.getLogger(JobRecommendationService.class);
     
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
     
     /**
      * Get recommended jobs for a student
@@ -279,7 +285,7 @@ public class JobRecommendationService {
                 .map(app -> app.getJobId())
                 .collect(Collectors.toSet());
         } catch (Exception e) {
-            System.err.println("Error fetching applied jobs: " + e.getMessage());
+            logger.error("Error fetching applied jobs: " + e.getMessage());
             return new HashSet<>();
         }
     }

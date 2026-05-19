@@ -1,5 +1,8 @@
 package com.rit.placement.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.util.DBConnection;
 import com.rit.placement.util.PasswordUtil;
 import org.apache.commons.csv.CSVFormat;
@@ -27,6 +30,7 @@ import java.util.Map;
  * Students should change their password on first login (not yet implemented).
  */
 public class CSVImporter {
+    private static final Logger logger = LoggerFactory.getLogger(CSVImporter.class);
 
     private static final String H_USN = "usn";
     private static final String H_NAME = "name";
@@ -123,7 +127,7 @@ public class CSVImporter {
                 } catch (Exception e) {
                     conn.rollback(sp);
                     skipped++;
-                    System.err.println("SKIP row " + rowIndex + ": " + e.getMessage());
+                    logger.error("SKIP row " + rowIndex + ": " + e.getMessage());
                 }
             }
 
@@ -131,8 +135,8 @@ public class CSVImporter {
             System.out.println("Import complete. Imported: " + imported + ", Skipped: " + skipped);
 
         } catch (Exception e) {
-            System.err.println("Import failed: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Import failed: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
             // Connection is auto-closed; uncommitted work is rolled back
         }
     }

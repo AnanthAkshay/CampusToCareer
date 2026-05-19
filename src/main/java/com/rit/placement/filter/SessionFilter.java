@@ -73,6 +73,23 @@ public class SessionFilter implements Filter {
             return;
         }
 
+        // CSRF Token Generation (if missing)
+        String csrfToken = (String) session.getAttribute("csrfToken");
+        if (csrfToken == null) {
+            csrfToken = java.util.UUID.randomUUID().toString();
+            session.setAttribute("csrfToken", csrfToken);
+        }
+
+        // CSRF Verification for state-changing requests
+        String method = req.getMethod();
+        if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method) || "DELETE".equalsIgnoreCase(method)) {
+            String requestToken = req.getParameter("csrfToken");
+            if (requestToken == null || !requestToken.equals(csrfToken)) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or missing CSRF token");
+                return;
+            }
+        }
+
         // Get user role from session
         String role = (String) session.getAttribute("role");
         if (role == null || role.trim().isEmpty()) {

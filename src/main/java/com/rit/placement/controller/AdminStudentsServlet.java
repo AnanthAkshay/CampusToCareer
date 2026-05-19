@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.dao.UserDAO;
 import com.rit.placement.model.Student;
@@ -18,9 +23,10 @@ import java.util.List;
  */
 @WebServlet("/admin/students")
 public class AdminStudentsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminStudentsServlet.class);
 
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final UserDAO userDAO = new UserDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -51,9 +57,9 @@ public class AdminStudentsServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/admin_students.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading students: " + e.getMessage());
+                "Error loading students.");
         }
     }
 
@@ -88,7 +94,7 @@ public class AdminStudentsServlet extends HttpServlet {
                 }
             } catch (SQLException e) {
                 // Log and continue with next student
-                e.printStackTrace();
+                logger.error("Exception occurred: ", e);
             }
         }
 

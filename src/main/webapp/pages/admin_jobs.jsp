@@ -37,21 +37,23 @@
     <div class="dashboard-header">
       <div>
         <h1 class="page-title">Manage Job Postings 💼</h1>
-        <p class="page-subtitle">Total: <%=totalJobs != null ? totalJobs : 0%> jobs</p>
+        <p class="page-subtitle">Total: <%= com.rit.placement.util.XSSUtil.escape(totalJobs != null ? totalJobs : 0) %> jobs</p>
       </div>
       <button class="btn-primary" onclick="toggleAddForm()">➕ Add Job</button>
     </div>
 
     <% if (successMessage != null) { %>
-      <div class="alert alert-success">✓ <%=successMessage%></div>
+      <div class="alert alert-success">✓ <%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error">✕ <%=errorMessage%></div>
+      <div class="alert alert-error">✕ <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <div id="addForm" class="form-card" style="display: none; margin-bottom: 20px;">
       <h3 id="formTitle">Add New Job Posting</h3>
       <form method="post" id="jobForm">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
         <input type="hidden" name="action" id="formAction" value="add">
         <input type="hidden" name="job_id" id="jobId">
         <div class="form-row">
@@ -60,7 +62,7 @@
             <select name="company_id" id="companyId" required>
               <option value="">Select Company</option>
               <% if (companies != null) for (Company c : companies) { %>
-                <option value="<%=c.getCompanyId()%>"><%=c.getCompanyName()%></option>
+                <option value="<%= com.rit.placement.util.XSSUtil.escape(c.getCompanyId()) %>"><%= com.rit.placement.util.XSSUtil.escape(c.getCompanyName()) %></option>
               <% } %>
             </select>
           </div>
@@ -103,28 +105,30 @@
         <% for (JobPosting job : jobs) { 
            boolean isExpired = job.getDeadline() != null && job.getDeadline().before(new java.util.Date());
         %>
-          <div class="job-card <%= isExpired ? "job-expired" : "" %>">
+          <div class="job-card <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "job-expired" : "") %>">
             <div class="job-card-header">
               <div>
-                <h3><%=job.getRole()%></h3>
-                <p><%=job.getCompanyName()%></p>
+                <h3><%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %></h3>
+                <p><%= com.rit.placement.util.XSSUtil.escape(job.getCompanyName()) %></p>
               </div>
-              <span class="badge <%= isExpired ? "badge-danger" : "badge-success" %>">
-                <%= isExpired ? "Expired" : "Active" %>
+              <span class="badge <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "badge-danger" : "badge-success") %>">
+                <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "Expired" : "Active") %>
               </span>
             </div>
             <div class="job-details">
-              <div><strong>Package:</strong> <%= job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed" %></div>
-              <div><strong>Min CGPA:</strong> <%= job.getMinCgpa() %></div>
-              <div><strong>Deadline:</strong> <%= job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A" %></div>
+              <div><strong>Package:</strong> <%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed") %></div>
+              <div><strong>Min CGPA:</strong> <%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa()) %></div>
+              <div><strong>Deadline:</strong> <%= com.rit.placement.util.XSSUtil.escape(job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A") %></div>
             </div>
             <div class="job-card-footer">
-              <span>ID: <%=job.getJobId()%></span>
+              <span>ID: <%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %></span>
               <div>
-                <button onclick="editJob(<%=job.getJobId()%>, <%=job.getCompanyId()%>, '<%=job.getRole().replace("'", "\\'")%>', '<%=job.getPackageAmount() != null ? job.getPackageAmount() : ""%>', '<%=job.getMinCgpa()%>', '<%=job.getAllowedBranches() != null ? job.getAllowedBranches().replace("'", "\\'") : ""%>', '<%=job.getRequiredSkills() != null ? job.getRequiredSkills().replace("'", "\\'").replace("\n", " ") : ""%>', '<%=job.getDeadline()%>')" class="btn-edit-sm">Edit</button>
+                <button onclick="editJob(<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>, <%= com.rit.placement.util.XSSUtil.escape(job.getCompanyId()) %>, '<%= com.rit.placement.util.XSSUtil.escape(job.getRole().replace("'", "\\'")) %>', '<%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount() != null ? job.getPackageAmount() : "") %>', '<%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa()) %>', '<%= com.rit.placement.util.XSSUtil.escape(job.getAllowedBranches() != null ? job.getAllowedBranches().replace("'", "\\'") : "") %>', '<%= com.rit.placement.util.XSSUtil.escape(job.getRequiredSkills() != null ? job.getRequiredSkills().replace("'", "\\'").replace("\n", " ") : "") %>', '<%= com.rit.placement.util.XSSUtil.escape(job.getDeadline()) %>')" class="btn-edit-sm">Edit</button>
                 <form method="post" style="display: inline; margin-left: 5px;" onsubmit="return confirm('Delete this job?');">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                   <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="job_id" value="<%=job.getJobId()%>">
+                  <input type="hidden" name="job_id" value="<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>">
                   <button type="submit" class="btn-danger-sm">Delete</button>
                 </form>
               </div>

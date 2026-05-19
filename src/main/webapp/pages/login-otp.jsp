@@ -180,10 +180,10 @@
     <div class="card-body">
 
         <% if (errorMessage != null) { %>
-        <div class="alert alert-error"><span>⚠️</span><span><%=errorMessage%></span></div>
+        <div class="alert alert-error"><span>⚠️</span><span><%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></span></div>
         <% } %>
         <% if (successMessage != null) { %>
-        <div class="alert alert-success"><span>✓</span><span><%=successMessage%></span></div>
+        <div class="alert alert-success"><span>✓</span><span><%= com.rit.placement.util.XSSUtil.escape(successMessage) %></span></div>
         <% } %>
 
         <!-- STAFF TAB: Admin / Coordinator / Proctor / Company -->
@@ -195,6 +195,8 @@
                 <span class="role-badge badge-company">🏢 Company</span>
             </div>
             <form action="${pageContext.request.contextPath}/login" method="post" id="staffForm">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                 <input type="hidden" name="loginType" value="password">
                 <div class="form-group">
                     <label for="staff-usn">Username / USN</label>
@@ -221,6 +223,8 @@
                 <strong>📧 How it works:</strong> Enter your USN and we'll send a 6-digit OTP to your registered email address.
             </div>
             <form action="${pageContext.request.contextPath}/otp/send" method="post" id="otpForm">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                 <div class="form-group">
                     <label for="usn">University Seat Number (USN)</label>
                     <input type="text" id="usn" name="usn"

@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.Interview;
 import com.rit.placement.util.DBConnection;
 
@@ -11,6 +14,7 @@ import java.util.List;
  * DAO for the 'interviews' table
  */
 public class InterviewDAO {
+    private static final Logger logger = LoggerFactory.getLogger(InterviewDAO.class);
     
     /**
      * Schedule a new interview
@@ -62,10 +66,11 @@ public class InterviewDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, companyId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            while (rs.next()) {
-                interviews.add(mapRow(rs));
+                while (rs.next()) {
+                    interviews.add(mapRow(rs));
+                }
             }
         }
         
@@ -91,10 +96,11 @@ public class InterviewDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, studentId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            while (rs.next()) {
-                interviews.add(mapRow(rs));
+                while (rs.next()) {
+                    interviews.add(mapRow(rs));
+                }
             }
         }
         
@@ -117,10 +123,11 @@ public class InterviewDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, interviewId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            if (rs.next()) {
-                return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
             }
         }
         
@@ -153,14 +160,15 @@ public class InterviewDAO {
             
             stmt.setInt(1, interviewId);
             stmt.setInt(2, companyId);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking interview ownership: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error checking interview ownership: " + e.getMessage());
+            logger.error("Database error", e);
         }
         
         return false;
@@ -182,14 +190,15 @@ public class InterviewDAO {
             
             stmt.setInt(1, studentId);
             stmt.setTimestamp(2, interviewDate);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
             
-            if (rs.next()) {
-                return rs.getInt(1) > 0;
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Error checking interview conflicts: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error checking interview conflicts: " + e.getMessage());
+            logger.error("Database error", e);
         }
         
         return false;

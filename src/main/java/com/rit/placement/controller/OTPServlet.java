@@ -1,5 +1,7 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.UserDAO;
 import com.rit.placement.model.User;
 import com.rit.placement.service.MetricsService;
@@ -32,7 +34,7 @@ public class OTPServlet extends HttpServlet {
 
     private static final Logger logger = LoggerFactory.getLogger(OTPServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
-    private final UserDAO userDAO = new UserDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
     private final MetricsService metricsService = MetricsService.getInstance();
     private static final int OTP_VALIDITY_MINUTES = 5;
 
@@ -142,7 +144,7 @@ public class OTPServlet extends HttpServlet {
         } catch (Exception e) {
             logger.error("Error processing OTP request for USN: {} from IP: {}", usn, clientIp, e);
             metricsService.recordError();
-            req.getSession().setAttribute("errorMessage", "Error processing request: " + e.getMessage());
+            req.getSession().setAttribute("errorMessage", "Error processing request.");
             resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
         }
     }

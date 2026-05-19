@@ -87,7 +87,7 @@
         </div>
         <% if (exception != null && request.getParameter("debug") != null) { %>
             <div class="error-details">
-                <strong>Error:</strong> <%= exception.getMessage() %>
+                <strong>Error:</strong> <%= com.rit.placement.util.XSSUtil.escape(exception.getMessage()) %>
             </div>
         <% } %>
     </div>

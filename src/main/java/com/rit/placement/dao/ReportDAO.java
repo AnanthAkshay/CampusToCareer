@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.util.DBConnection;
 
 import java.sql.*;
@@ -12,6 +15,7 @@ import java.util.Map;
  * DAO for generating placement reports
  */
 public class ReportDAO {
+    private static final Logger logger = LoggerFactory.getLogger(ReportDAO.class);
     
     /**
      * Student report data structure
@@ -78,8 +82,8 @@ public class ReportDAO {
                 students.add(data);
             }
         } catch (SQLException e) {
-            System.err.println("Error fetching student report data: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching student report data: " + e.getMessage());
+            logger.error("Database error", e);
         }
         
         return students;
@@ -135,8 +139,8 @@ public class ReportDAO {
             stats.put("placementPercentage", percentage);
             
         } catch (SQLException e) {
-            System.err.println("Error fetching summary stats: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error fetching summary stats: " + e.getMessage());
+            logger.error("Database error", e);
         }
         
         return stats;

@@ -1,5 +1,7 @@
 package com.rit.placement.controller;
 
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.model.Application;
@@ -17,6 +19,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import com.rit.placement.model.Student;
+import com.rit.placement.dao.StudentDAO;
+import com.rit.placement.util.CGPACalculator;
 
 /**
  * Apply Servlet - Handles job applications
@@ -29,8 +35,8 @@ public class ApplyServlet extends HttpServlet {
     private static final Logger logger = LoggerFactory.getLogger(ApplyServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AUDIT");
     
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
     private final EligibilityService eligibilityService = new EligibilityService();
     private final NotificationService notificationService = new NotificationService();
     private final MetricsService metricsService = MetricsService.getInstance();
@@ -56,22 +62,36 @@ public class ApplyServlet extends HttpServlet {
         }
 
         try {
-            // 3. Fetch all active job postings
-            List<JobPosting> allJobs = jobPostingDAO.getAllJobPostings();
+            // Pagination setup
+            int page = 1;
+            int limit = 10;
+            String pageParam = req.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                page = Integer.parseInt(pageParam);
+            }
+            int offset = (page - 1) * limit;
 
-            // 4. Create JobApplicationStatus for each job
-            List<JobApplicationStatus> jobStatuses = new ArrayList<>();
+            // Optimize N+1 query: Single LEFT JOIN query with pagination
+            List<JobApplicationStatus> jobStatuses = jobPostingDAO.getJobsWithApplicationStatus(userId, limit, offset);
+
+            // Cache CGPA in Session to prevent repeated DB calculation
+            Double cgpa = (Double) session.getAttribute("cached_cgpa");
+            if (cgpa == null) {
+                cgpa = CGPACalculator.calculateCGPA(userId);
+                session.setAttribute("cached_cgpa", cgpa);
+            }
             
-            for (JobPosting job : allJobs) {
-                boolean hasApplied = applicationDAO.hasApplied(userId, job.getJobId());
-                boolean eligible = eligibilityService.isEligible(userId, job.getJobId());
-                
-                JobApplicationStatus status = new JobApplicationStatus(job, hasApplied, eligible);
-                jobStatuses.add(status);
+            Student student = DAOFactory.getInstance().getStudentDAO().getStudentById(userId);
+
+            // Compute eligibility once per job in memory
+            for (JobApplicationStatus status : jobStatuses) {
+                boolean eligible = eligibilityService.isEligible(student, cgpa, status.getJob());
+                status.setEligible(eligible);
             }
 
-            // 5. Set attributes for JSP
             req.setAttribute("jobStatuses", jobStatuses);
+            req.setAttribute("currentPage", page);
+            req.setAttribute("limit", limit);
 
             // 6. Forward to apply.jsp
             req.getRequestDispatcher("/pages/apply.jsp").forward(req, resp);
@@ -80,7 +100,7 @@ public class ApplyServlet extends HttpServlet {
             logger.error("Error loading jobs for student {}", userId, e);
             metricsService.recordError();
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading jobs: " + e.getMessage());
+                "Error loading jobs.");
         }
     }
 
@@ -184,7 +204,7 @@ public class ApplyServlet extends HttpServlet {
             logger.error("Error submitting application for student {}, jobId: {}", 
                 userId, req.getParameter("job_id"), e);
             metricsService.recordError();
-            session.setAttribute("errorMessage", "Error submitting application: " + e.getMessage());
+            session.setAttribute("errorMessage", "Error submitting application.");
             resp.sendRedirect(req.getContextPath() + "/apply");
         }
     }

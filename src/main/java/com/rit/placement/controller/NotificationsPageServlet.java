@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.NotificationDAO;
 import com.rit.placement.model.Notification;
 import jakarta.servlet.ServletException;
@@ -15,8 +20,9 @@ import java.util.List;
  */
 @WebServlet("/notifications")
 public class NotificationsPageServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationsPageServlet.class);
     
-    private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final NotificationDAO notificationDAO = DAOFactory.getInstance().getNotificationDAO();
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -46,8 +52,8 @@ public class NotificationsPageServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/notifications.jsp").forward(req, resp);
             
         } catch (Exception e) {
-            System.err.println("Error loading notifications page: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error loading notifications page.");
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to load notifications");
         }
     }

@@ -287,8 +287,8 @@ public class CSVImporterService {
      * Insert student into students table
      */
     private static void insertStudent(Connection conn, int userId, String usn) throws SQLException {
-        String sql = "INSERT INTO students (student_id, branch, current_sem, skills, projects, experience) " +
-                     "VALUES (?, 'ISE', 3, '', '', '') " +
+        String sql = "INSERT INTO students (student_id, branch, current_sem, projects, experience) " +
+                     "VALUES (?, 'ISE', 3, '', '') " +
                      "ON DUPLICATE KEY UPDATE student_id = student_id";
         
         try (PreparedStatement ps = conn.prepareStatement(sql)) {

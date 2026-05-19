@@ -24,7 +24,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interviews — <%= company != null ? company.getCompanyName() : "Company" %></title>
+  <title>Interviews — <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company") %></title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -139,7 +139,7 @@
 </head>
 <body>
   <div class="navbar">
-    <h1>🏢 <%= company != null ? company.getCompanyName() : "Company Portal" %></h1>
+    <h1>🏢 <%= com.rit.placement.util.XSSUtil.escape(company != null ? company.getCompanyName() : "Company Portal") %></h1>
     <div>
       <a href="${pageContext.request.contextPath}/company/dashboard">Dashboard</a>
       <a href="${pageContext.request.contextPath}/company/jobs">Manage Jobs</a>
@@ -150,10 +150,10 @@
 
   <div class="container">
     <% if (successMessage != null) { %>
-      <div class="alert alert-success"><%= successMessage %></div>
+      <div class="alert alert-success"><%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error"><%= errorMessage %></div>
+      <div class="alert alert-error"><%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <!-- Schedule Interview Form -->
@@ -161,14 +161,16 @@
       <h3>📅 Schedule Interview</h3>
       <% if (shortlistedApps != null && !shortlistedApps.isEmpty()) { %>
         <form method="post" action="${pageContext.request.contextPath}/company/interviews">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
           <div class="form-grid">
             <div class="form-group">
               <label>Select Candidate *</label>
               <select name="application_id" required>
                 <option value="">Choose a candidate...</option>
                 <% for (Application app : shortlistedApps) { %>
-                  <option value="<%= app.getId() %>">
-                    <%= app.getStudentName() %> (<%= app.getStudentUsn() %>) - <%= app.getJobTitle() %>
+                  <option value="<%= com.rit.placement.util.XSSUtil.escape(app.getId()) %>">
+                    <%= com.rit.placement.util.XSSUtil.escape(app.getStudentName()) %> (<%= com.rit.placement.util.XSSUtil.escape(app.getStudentUsn()) %>) - <%= com.rit.placement.util.XSSUtil.escape(app.getJobTitle()) %>
                   </option>
                 <% } %>
               </select>
@@ -226,26 +228,26 @@
             <% for (Interview interview : interviews) { %>
             <tr>
               <td>
-                <strong><%= interview.getStudentName() %></strong><br>
-                <small style="color: #6b7280;"><%= interview.getStudentUsn() %></small>
+                <strong><%= com.rit.placement.util.XSSUtil.escape(interview.getStudentName()) %></strong><br>
+                <small style="color: #6b7280;"><%= com.rit.placement.util.XSSUtil.escape(interview.getStudentUsn()) %></small>
               </td>
-              <td><%= interview.getJobTitle() %></td>
-              <td><%= interview.getInterviewDate() != null ? dateFormat.format(interview.getInterviewDate()) : "N/A" %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(interview.getJobTitle()) %></td>
+              <td><%= com.rit.placement.util.XSSUtil.escape(interview.getInterviewDate() != null ? dateFormat.format(interview.getInterviewDate()) : "N/A") %></td>
               <td>
-                <span class="badge badge-<%= interview.getInterviewMode() != null ? interview.getInterviewMode().toLowerCase() : "online" %>">
-                  <%= interview.getInterviewMode() %>
+                <span class="badge badge-<%= com.rit.placement.util.XSSUtil.escape(interview.getInterviewMode() != null ? interview.getInterviewMode().toLowerCase() : "online") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(interview.getInterviewMode()) %>
                 </span>
               </td>
               <td>
-                <span class="badge badge-<%= interview.getStatus() != null ? interview.getStatus().toLowerCase() : "scheduled" %>">
-                  <%= interview.getStatus() %>
+                <span class="badge badge-<%= com.rit.placement.util.XSSUtil.escape(interview.getStatus() != null ? interview.getStatus().toLowerCase() : "scheduled") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(interview.getStatus()) %>
                 </span>
               </td>
               <td>
                 <% if ("ONLINE".equals(interview.getInterviewMode()) && interview.getInterviewLink() != null) { %>
-                  <a href="<%= interview.getInterviewLink() %>" target="_blank" style="color: #3b82f6;">Join Link</a>
+                  <a href="<%= com.rit.placement.util.XSSUtil.escape(interview.getInterviewLink()) %>" target="_blank" style="color: #3b82f6;">Join Link</a>
                 <% } else if ("OFFLINE".equals(interview.getInterviewMode()) && interview.getInterviewLocation() != null) { %>
-                  <%= interview.getInterviewLocation() %>
+                  <%= com.rit.placement.util.XSSUtil.escape(interview.getInterviewLocation()) %>
                 <% } else { %>
                   -
                 <% } %>

@@ -38,24 +38,24 @@
     <div class="dashboard-header">
       <div>
         <h1 class="page-title">Manage Companies 🏢</h1>
-        <p class="page-subtitle">Total: <%=totalCompanies != null ? totalCompanies : 0%> companies | 
-          <span style="color: #f59e0b;"><%=pendingCount != null ? pendingCount : 0%> pending requests</span>
+        <p class="page-subtitle">Total: <%= com.rit.placement.util.XSSUtil.escape(totalCompanies != null ? totalCompanies : 0) %> companies | 
+          <span style="color: #f59e0b;"><%= com.rit.placement.util.XSSUtil.escape(pendingCount != null ? pendingCount : 0) %> pending requests</span>
         </p>
       </div>
       <button class="btn-primary" onclick="toggleAddForm()">➕ Add Company</button>
     </div>
 
     <% if (successMessage != null) { %>
-      <div class="alert alert-success">✓ <%=successMessage%></div>
+      <div class="alert alert-success">✓ <%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error">✕ <%=errorMessage%></div>
+      <div class="alert alert-error">✕ <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <!-- Pending Requests Section -->
     <% if (pendingRequests != null && !pendingRequests.isEmpty()) { %>
       <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-        <h3 style="margin-bottom: 15px; color: #856404;">⏳ Pending Company Requests (<%=pendingRequests.size()%>)</h3>
+        <h3 style="margin-bottom: 15px; color: #856404;">⏳ Pending Company Requests (<%= com.rit.placement.util.XSSUtil.escape(pendingRequests.size()) %>)</h3>
         <div class="table-wrap">
           <table style="width: 100%;">
             <thead>
@@ -70,19 +70,23 @@
             <tbody>
               <% for (CompanyRequest req : pendingRequests) { %>
                 <tr>
-                  <td><strong><%=req.getCompanyName()%></strong></td>
-                  <td><span class="badge"><%=req.getCompanyType()%></span></td>
-                  <td><%=req.getEmail() != null ? req.getEmail() : "N/A"%></td>
-                  <td><%=req.getRequestedAt() != null ? dateFormat.format(req.getRequestedAt()) : "N/A"%></td>
+                  <td><strong><%= com.rit.placement.util.XSSUtil.escape(req.getCompanyName()) %></strong></td>
+                  <td><span class="badge"><%= com.rit.placement.util.XSSUtil.escape(req.getCompanyType()) %></span></td>
+                  <td><%= com.rit.placement.util.XSSUtil.escape(req.getEmail() != null ? req.getEmail() : "N/A") %></td>
+                  <td><%= com.rit.placement.util.XSSUtil.escape(req.getRequestedAt() != null ? dateFormat.format(req.getRequestedAt()) : "N/A") %></td>
                   <td>
                     <form method="post" style="display: inline;" onsubmit="return confirm('Approve this company request?');">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                       <input type="hidden" name="action" value="approve_request">
-                      <input type="hidden" name="request_id" value="<%=req.getRequestId()%>">
+                      <input type="hidden" name="request_id" value="<%= com.rit.placement.util.XSSUtil.escape(req.getRequestId()) %>">
                       <button type="submit" class="btn-success-sm">✓ Approve</button>
                     </form>
                     <form method="post" style="display: inline; margin-left: 5px;" onsubmit="return confirm('Reject this request?');">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                       <input type="hidden" name="action" value="reject_request">
-                      <input type="hidden" name="request_id" value="<%=req.getRequestId()%>">
+                      <input type="hidden" name="request_id" value="<%= com.rit.placement.util.XSSUtil.escape(req.getRequestId()) %>">
                       <button type="submit" class="btn-danger-sm">✕ Reject</button>
                     </form>
                   </td>
@@ -98,6 +102,8 @@
     <div id="addForm" class="form-card" style="display: none; margin-bottom: 20px;">
       <h3 id="formTitle">Add New Company</h3>
       <form method="post" id="companyForm">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
         <input type="hidden" name="action" id="formAction" value="add">
         <input type="hidden" name="company_id" id="companyId">
         <div class="form-group">
@@ -128,17 +134,19 @@
         <% for (Company company : companies) { %>
           <div class="company-card">
             <div class="company-card-header">
-              <h3><%=company.getCompanyName()%></h3>
-              <span class="badge"><%=company.getCompanyType()%></span>
+              <h3><%= com.rit.placement.util.XSSUtil.escape(company.getCompanyName()) %></h3>
+              <span class="badge"><%= com.rit.placement.util.XSSUtil.escape(company.getCompanyType()) %></span>
             </div>
-            <p><%=company.getDescription() != null ? company.getDescription() : "No description"%></p>
+            <p><%= com.rit.placement.util.XSSUtil.escape(company.getDescription() != null ? company.getDescription() : "No description") %></p>
             <div class="company-card-footer">
-              <span>ID: <%=company.getCompanyId()%></span>
+              <span>ID: <%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %></span>
               <div>
-                <button onclick="editCompany(<%=company.getCompanyId()%>, '<%=company.getCompanyName().replace("'", "\\'")%>', '<%=company.getCompanyType()%>', '<%=company.getDescription() != null ? company.getDescription().replace("'", "\\'").replace("\n", " ") : ""%>')" class="btn-edit-sm">Edit</button>
+                <button onclick="editCompany(<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %>, '<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyName().replace("'", "\\'")) %>', '<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyType()) %>', '<%= com.rit.placement.util.XSSUtil.escape(company.getDescription() != null ? company.getDescription().replace("'", "\\'").replace("\n", " ") : "") %>')" class="btn-edit-sm">Edit</button>
                 <form method="post" style="display: inline; margin-left: 5px;" onsubmit="return confirm('Delete this company?');">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                   <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="company_id" value="<%=company.getCompanyId()%>">
+                  <input type="hidden" name="company_id" value="<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %>">
                   <button type="submit" class="btn-danger-sm">Delete</button>
                 </form>
               </div>

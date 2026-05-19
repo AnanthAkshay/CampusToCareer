@@ -63,14 +63,14 @@
     <% if (successMessage != null) { %>
       <div class="alert alert-success" role="status" aria-live="polite">
         <span class="alert-icon">✓</span>
-        <%=successMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(successMessage) %>
       </div>
     <% } %>
     
     <% if (errorMessage != null) { %>
       <div class="alert alert-error">
         <span class="alert-icon">✕</span>
-        <%=errorMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %>
       </div>
     <% } %>
 
@@ -84,13 +84,13 @@
              boolean hasApplied = jobStatus.isHasApplied();
              boolean isEligible = jobStatus.isEligible();
         %>
-          <div class="job-card <%= isExpired ? "job-expired" : "" %>">
+          <div class="job-card <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "job-expired" : "") %>">
             <div class="job-card-header">
               <div class="job-company">
                 <span class="job-icon">💼</span>
                 <div>
-                  <h3 class="job-title"><%=job.getRole()%></h3>
-                  <p class="job-company-name"><%=job.getCompanyName()%></p>
+                  <h3 class="job-title"><%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %></h3>
+                  <p class="job-company-name"><%= com.rit.placement.util.XSSUtil.escape(job.getCompanyName()) %></p>
                 </div>
               </div>
               <% if (hasApplied) { %>
@@ -108,28 +108,28 @@
               <div class="job-detail-item">
                 <span class="job-detail-label">💰 Package:</span>
                 <span class="job-detail-value">
-                  <%= job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed" %>
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed") %>
                 </span>
               </div>
               
               <div class="job-detail-item">
                 <span class="job-detail-label">📊 Min CGPA:</span>
                 <span class="job-detail-value">
-                  <%= job.getMinCgpa() != null ? job.getMinCgpa() : "N/A" %>
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa() != null ? job.getMinCgpa() : "N/A") %>
                 </span>
               </div>
               
               <% if (job.getAllowedBranches() != null && !job.getAllowedBranches().isEmpty()) { %>
               <div class="job-detail-item">
                 <span class="job-detail-label">🎓 Branches:</span>
-                <span class="job-detail-value"><%=job.getAllowedBranches()%></span>
+                <span class="job-detail-value"><%= com.rit.placement.util.XSSUtil.escape(job.getAllowedBranches()) %></span>
               </div>
               <% } %>
               
               <div class="job-detail-item">
                 <span class="job-detail-label">📅 Deadline:</span>
-                <span class="job-detail-value <%= isExpired ? "text-danger" : "" %>">
-                  <%= job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A" %>
+                <span class="job-detail-value <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "text-danger" : "") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A") %>
                 </span>
               </div>
             </div>
@@ -143,14 +143,14 @@
                   for (String skill : skills) {
                     if (skill.trim().length() > 0) {
                 %>
-                  <span class="skill-tag"><%=skill.trim()%></span>
+                  <span class="skill-tag"><%= com.rit.placement.util.XSSUtil.escape(skill.trim()) %></span>
                 <% } } %>
               </div>
             </div>
             <% } %>
 
             <div class="job-card-footer">
-              <span class="job-id">Job ID: <%=job.getJobId()%></span>
+              <span class="job-id">Job ID: <%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %></span>
               <% if (hasApplied) { %>
                 <button class="btn-action" disabled>Already Applied</button>
               <% } else if (isExpired) { %>
@@ -159,7 +159,9 @@
                 <button class="btn-action" disabled>Not Eligible</button>
               <% } else { %>
                 <form action="${pageContext.request.contextPath}/apply" method="post" style="display: inline;">
-                  <input type="hidden" name="job_id" value="<%=job.getJobId()%>">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
+                  <input type="hidden" name="job_id" value="<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>">
                   <button type="submit" class="btn-action" onclick="return confirm('Are you sure you want to apply for this job?')">
                     Apply Now
                   </button>

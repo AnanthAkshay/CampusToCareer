@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.DocumentDAO;
 import com.rit.placement.model.Document;
 import jakarta.servlet.*;
@@ -8,10 +13,12 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import org.apache.tika.Tika;
 
 /**
  * Upload Servlet - Handles document uploads (resume, certificates)
@@ -24,8 +31,9 @@ import java.nio.file.StandardCopyOption;
     maxRequestSize = 1024 * 1024 * 50     // 50MB
 )
 public class UploadServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(UploadServlet.class);
 
-    private final DocumentDAO documentDAO = new DocumentDAO();
+    private final DocumentDAO documentDAO = DAOFactory.getInstance().getDocumentDAO();
     private static final String UPLOAD_DIR = "uploads";
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -73,18 +81,22 @@ public class UploadServlet extends HttpServlet {
                 return;
             }
 
-            // 6. Validate file type (PDF only for resume)
+            // 6. Validate file type via Magic Bytes (Apache Tika)
             String fileName = getFileName(filePart);
             String fileExtension = getFileExtension(fileName);
             
-            if ("resume".equalsIgnoreCase(docType) && !fileExtension.equalsIgnoreCase("pdf")) {
-                session.setAttribute("errorMessage", "Resume must be a PDF file");
-                resp.sendRedirect(req.getContextPath() + "/student/profile");
-                return;
+            Tika tika = new Tika();
+            try (InputStream is = filePart.getInputStream()) {
+                String mimeType = tika.detect(is);
+                if (!"application/pdf".equals(mimeType)) {
+                    session.setAttribute("errorMessage", "Uploaded file must be a valid PDF document (detected: " + mimeType + ")");
+                    resp.sendRedirect(req.getContextPath() + "/student/profile");
+                    return;
+                }
             }
 
-            // 7. Create upload directory if it doesn't exist
-            String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIR;
+            // 7. Create upload directory securely OUTSIDE web root
+            String uploadPath = System.getProperty("user.home") + File.separator + "vibe_uploads";
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
@@ -128,8 +140,8 @@ public class UploadServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/student/profile");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("errorMessage", "Error uploading document: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            session.setAttribute("errorMessage", "Error uploading document.");
             resp.sendRedirect(req.getContextPath() + "/student/profile");
         }
     }

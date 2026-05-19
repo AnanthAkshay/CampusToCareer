@@ -77,6 +77,7 @@ public class ApplicationStartupListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         logger.info("=== RIT Placement Portal Shutting Down ===");
+        com.rit.placement.util.DBConnection.closePool();
         auditLogger.info("APPLICATION_SHUTDOWN - RIT Placement Portal stopping");
     }
 }

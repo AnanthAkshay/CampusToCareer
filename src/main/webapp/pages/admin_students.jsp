@@ -26,7 +26,7 @@
     <div class="dashboard-header">
       <div>
         <h1 class="page-title">Manage Students 👥</h1>
-        <p class="page-subtitle">Total: <%=totalStudents != null ? totalStudents : 0%> students</p>
+        <p class="page-subtitle">Total: <%= com.rit.placement.util.XSSUtil.escape(totalStudents != null ? totalStudents : 0) %> students</p>
       </div>
     </div>
 
@@ -47,12 +47,12 @@
           <tbody>
             <% for (StudentDetails student : students) { %>
               <tr>
-                <td><%=student.getUsn()%></td>
-                <td><%=student.getName()%></td>
-                <td><%=student.getBranch()%></td>
-                <td><%=student.getCurrentSem()%></td>
-                <td><span class="cgpa-badge"><%=String.format("%.2f", student.getCgpa())%></span></td>
-                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;"><%=student.getSkills()%></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(student.getUsn()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(student.getName()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(student.getBranch()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(student.getCurrentSem()) %></td>
+                <td><span class="cgpa-badge"><%= com.rit.placement.util.XSSUtil.escape(String.format("%.2f", student.getCgpa())) %></span></td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;"><%= com.rit.placement.util.XSSUtil.escape(student.getSkills()) %></td>
                 <td>
                   <% if (student.isActive()) { %>
                     <span class="badge badge-success">Active</span>

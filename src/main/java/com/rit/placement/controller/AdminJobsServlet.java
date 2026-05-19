@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.model.Company;
@@ -17,9 +22,10 @@ import java.util.List;
  */
 @WebServlet("/admin/jobs")
 public class AdminJobsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminJobsServlet.class);
 
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -39,8 +45,18 @@ public class AdminJobsServlet extends HttpServlet {
         }
 
         try {
+            int page = 1;
+            int limit = 10;
+            String pageParam = req.getParameter("page");
+            if (pageParam != null && !pageParam.isEmpty()) {
+                page = Integer.parseInt(pageParam);
+            }
+            int offset = (page - 1) * limit;
+
             // Get all job postings
-            List<JobPosting> jobs = jobPostingDAO.getAllJobPostings();
+            List<JobPosting> jobs = jobPostingDAO.getAllJobPostings(limit, offset);
+            req.setAttribute("currentPage", page);
+            req.setAttribute("limit", limit);
             
             // Get all companies for dropdown
             List<Company> companies = companyDAO.getAllCompanies();
@@ -54,9 +70,9 @@ public class AdminJobsServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/admin_jobs.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading jobs: " + e.getMessage());
+                "Error loading jobs.");
         }
     }
 
@@ -147,8 +163,8 @@ public class AdminJobsServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/admin/jobs");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("errorMessage", "Error: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            session.setAttribute("errorMessage", "Error.");
             resp.sendRedirect(req.getContextPath() + "/admin/jobs");
         }
     }

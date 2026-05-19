@@ -1,5 +1,8 @@
 package com.rit.placement.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rit.placement.model.Document;
 import com.rit.placement.util.DBConnection;
 import java.sql.*;
@@ -8,6 +11,7 @@ import java.sql.*;
  * DAO for the 'documents' table.
  */
 public class DocumentDAO {
+    private static final Logger logger = LoggerFactory.getLogger(DocumentDAO.class);
 
     /**
      * Insert a new document record
@@ -41,12 +45,13 @@ public class DocumentDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, studentId);
-            ResultSet rs = ps.executeQuery();
+            try (ResultSet rs = ps.executeQuery()) {
             
-            if (rs.next()) {
-                return mapRow(rs);
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+                return null;
             }
-            return null;
         }
     }
 

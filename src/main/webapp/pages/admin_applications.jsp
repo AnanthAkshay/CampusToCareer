@@ -32,23 +32,23 @@
     <div class="dashboard-header">
       <div>
         <h1 class="page-title">Manage Applications 📝</h1>
-        <p class="page-subtitle">Total: <%=stats != null ? stats.getTotal() : 0%> applications</p>
+        <p class="page-subtitle">Total: <%= com.rit.placement.util.XSSUtil.escape(stats != null ? stats.getTotal() : 0) %> applications</p>
       </div>
     </div>
 
     <% if (successMessage != null) { %>
-      <div class="alert alert-success">✓ <%=successMessage%></div>
+      <div class="alert alert-success">✓ <%= com.rit.placement.util.XSSUtil.escape(successMessage) %></div>
     <% } %>
     <% if (errorMessage != null) { %>
-      <div class="alert alert-error">✕ <%=errorMessage%></div>
+      <div class="alert alert-error">✕ <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %></div>
     <% } %>
 
     <% if (stats != null) { %>
     <div class="stats-grid" style="margin-bottom: 20px;">
-      <div class="stat-card"><div class="stat-label">Applied</div><div class="stat-value"><%=stats.getApplied()%></div></div>
-      <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value"><%=stats.getShortlisted()%></div></div>
-      <div class="stat-card"><div class="stat-label">Selected</div><div class="stat-value"><%=stats.getSelected()%></div></div>
-      <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-value"><%=stats.getRejected()%></div></div>
+      <div class="stat-card"><div class="stat-label">Applied</div><div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getApplied()) %></div></div>
+      <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getShortlisted()) %></div></div>
+      <div class="stat-card"><div class="stat-label">Selected</div><div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getSelected()) %></div></div>
+      <div class="stat-card"><div class="stat-label">Rejected</div><div class="stat-value"><%= com.rit.placement.util.XSSUtil.escape(stats.getRejected()) %></div></div>
     </div>
     <% } %>
 
@@ -69,20 +69,22 @@
           <tbody>
             <% for (Application app : applications) { %>
               <tr>
-                <td>#<%=app.getApplicationId()%></td>
-                <td><%=app.getStudentName()%></td>
-                <td><%=app.getStudentUsn()%></td>
-                <td><%=app.getCompanyName()%></td>
-                <td><%=app.getJobRole()%></td>
+                <td>#<%= com.rit.placement.util.XSSUtil.escape(String.valueOf(app.getId())) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(app.getStudentName()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(app.getStudentUsn()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(app.getCompanyName()) %></td>
+                <td><%= com.rit.placement.util.XSSUtil.escape(app.getJobTitle()) %></td>
                 <td>
-                  <span class="badge badge-<%=app.getStatus().toLowerCase()%>">
-                    <%=app.getStatus()%>
+                  <span class="badge badge-<%= com.rit.placement.util.XSSUtil.escape(app.getStatus().toLowerCase()) %>">
+                    <%= com.rit.placement.util.XSSUtil.escape(app.getStatus()) %>
                   </span>
                 </td>
                 <td>
                   <form method="post" style="display: inline;">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
                     <input type="hidden" name="action" value="update_status">
-                    <input type="hidden" name="application_id" value="<%=app.getApplicationId()%>">
+                    <input type="hidden" name="application_id" value="<%= com.rit.placement.util.XSSUtil.escape(String.valueOf(app.getId())) %>">
                     <select name="status" onchange="this.form.submit()" class="status-select">
                       <option value="">Change Status</option>
                       <option value="APPLIED">Applied</option>

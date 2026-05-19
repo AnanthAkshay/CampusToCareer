@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ProctorDAO;
 import com.rit.placement.model.Student;
 import jakarta.servlet.ServletException;
@@ -17,8 +22,9 @@ import java.util.List;
  */
 @WebServlet("/proctor/dashboard")
 public class ProctorDashboardServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(ProctorDashboardServlet.class);
 
-    private final ProctorDAO proctorDAO = new ProctorDAO();
+    private final ProctorDAO proctorDAO = DAOFactory.getInstance().getProctorDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -58,8 +64,8 @@ public class ProctorDashboardServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/proctor_dashboard.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            req.setAttribute("errorMessage", "Error loading dashboard: " + e.getMessage());
+            logger.error("Exception occurred: ", e);
+            req.setAttribute("errorMessage", "Error loading dashboard.");
             req.getRequestDispatcher("/pages/error/500.jsp").forward(req, resp);
         }
     }

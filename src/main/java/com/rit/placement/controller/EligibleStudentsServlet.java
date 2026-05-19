@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.JobPostingDAO;
 import com.rit.placement.dao.StudentDAO;
 import com.rit.placement.dao.UserDAO;
@@ -23,11 +28,12 @@ import java.util.List;
  */
 @WebServlet("/eligible-students")
 public class EligibleStudentsServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(EligibleStudentsServlet.class);
 
     private final EligibilityService eligibilityService = new EligibilityService();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
-    private final UserDAO userDAO = new UserDAO();
-    private final StudentDAO studentDAO = new StudentDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
+    private final UserDAO userDAO = DAOFactory.getInstance().getUserDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -104,7 +110,7 @@ public class EligibleStudentsServlet extends HttpServlet {
 
                 } catch (SQLException e) {
                     // Log and continue with next student
-                    e.printStackTrace();
+                    logger.error("Exception occurred: ", e);
                 }
             }
 
@@ -122,9 +128,9 @@ public class EligibleStudentsServlet extends HttpServlet {
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid job_id format");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading eligible students: " + e.getMessage());
+                "Error loading eligible students.");
         }
     }
 

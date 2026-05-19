@@ -68,14 +68,14 @@
     <% if (successMessage != null) { %>
       <div class="alert alert-success" role="status" aria-live="polite">
         <span class="alert-icon">✓</span>
-        <%=successMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(successMessage) %>
       </div>
     <% } %>
     
     <% if (errorMessage != null) { %>
       <div class="alert alert-error">
         <span class="alert-icon">✕</span>
-        <%=errorMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %>
       </div>
     <% } %>
 
@@ -87,6 +87,8 @@
         <button class="btn-close" onclick="toggleAddForm()">✕</button>
       </div>
       <form action="${pageContext.request.contextPath}/job-postings" method="post" class="job-form">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
         <div class="form-row">
           <div class="form-group">
             <label for="company_id">Company <span class="required">*</span></label>
@@ -94,7 +96,7 @@
               <option value="">Select Company</option>
               <% if (companies != null) {
                    for (Company company : companies) { %>
-                <option value="<%=company.getCompanyId()%>"><%=company.getCompanyName()%></option>
+                <option value="<%= com.rit.placement.util.XSSUtil.escape(company.getCompanyId()) %>"><%= com.rit.placement.util.XSSUtil.escape(company.getCompanyName()) %></option>
               <% } } %>
             </select>
           </div>
@@ -158,13 +160,13 @@
              boolean isExpired = job.getDeadline() != null && 
                                  job.getDeadline().before(new java.util.Date());
         %>
-          <div class="job-card <%= isExpired ? "job-expired" : "" %>">
+          <div class="job-card <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "job-expired" : "") %>">
             <div class="job-card-header">
               <div class="job-company">
                 <span class="job-icon">💼</span>
                 <div>
-                  <h3 class="job-title"><%=job.getRole()%></h3>
-                  <p class="job-company-name"><%=job.getCompanyName()%></p>
+                  <h3 class="job-title"><%= com.rit.placement.util.XSSUtil.escape(job.getRole()) %></h3>
+                  <p class="job-company-name"><%= com.rit.placement.util.XSSUtil.escape(job.getCompanyName()) %></p>
                 </div>
               </div>
               <% if (isExpired) { %>
@@ -178,28 +180,28 @@
               <div class="job-detail-item">
                 <span class="job-detail-label">💰 Package:</span>
                 <span class="job-detail-value">
-                  <%= job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed" %>
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getPackageAmount() != null ? job.getPackageAmount() + " LPA" : "Not disclosed") %>
                 </span>
               </div>
               
               <div class="job-detail-item">
                 <span class="job-detail-label">📊 Min CGPA:</span>
                 <span class="job-detail-value">
-                  <%= job.getMinCgpa() != null ? job.getMinCgpa() : "N/A" %>
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getMinCgpa() != null ? job.getMinCgpa() : "N/A") %>
                 </span>
               </div>
               
               <% if (job.getAllowedBranches() != null && !job.getAllowedBranches().isEmpty()) { %>
               <div class="job-detail-item">
                 <span class="job-detail-label">🎓 Branches:</span>
-                <span class="job-detail-value"><%=job.getAllowedBranches()%></span>
+                <span class="job-detail-value"><%= com.rit.placement.util.XSSUtil.escape(job.getAllowedBranches()) %></span>
               </div>
               <% } %>
               
               <div class="job-detail-item">
                 <span class="job-detail-label">📅 Deadline:</span>
-                <span class="job-detail-value <%= isExpired ? "text-danger" : "" %>">
-                  <%= job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A" %>
+                <span class="job-detail-value <%= com.rit.placement.util.XSSUtil.escape(isExpired ? "text-danger" : "") %>">
+                  <%= com.rit.placement.util.XSSUtil.escape(job.getDeadline() != null ? dateFormat.format(job.getDeadline()) : "N/A") %>
                 </span>
               </div>
             </div>
@@ -213,17 +215,17 @@
                   for (String skill : skills) {
                     if (skill.trim().length() > 0) {
                 %>
-                  <span class="skill-tag"><%=skill.trim()%></span>
+                  <span class="skill-tag"><%= com.rit.placement.util.XSSUtil.escape(skill.trim()) %></span>
                 <% } } %>
               </div>
             </div>
             <% } %>
 
             <div class="job-card-footer">
-              <span class="job-id">Job ID: <%=job.getJobId()%></span>
+              <span class="job-id">Job ID: <%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %></span>
               <div class="job-actions">
                 <% if ("COORDINATOR".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role)) { %>
-                  <a href="${pageContext.request.contextPath}/eligible-students?job_id=<%=job.getJobId()%>" 
+                  <a href="${pageContext.request.contextPath}/eligible-students?job_id=<%= com.rit.placement.util.XSSUtil.escape(job.getJobId()) %>" 
                      class="btn-link">
                     View Eligible Students →
                   </a>

@@ -1,5 +1,10 @@
 package com.rit.placement.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.rit.placement.factory.DAOFactory;
+
 import com.rit.placement.dao.ApplicationDAO;
 import com.rit.placement.dao.CompanyDAO;
 import com.rit.placement.dao.JobPostingDAO;
@@ -17,11 +22,12 @@ import java.sql.*;
  */
 @WebServlet("/admin/dashboard")
 public class AdminDashboardServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(AdminDashboardServlet.class);
 
-    private final StudentDAO studentDAO = new StudentDAO();
-    private final ApplicationDAO applicationDAO = new ApplicationDAO();
-    private final CompanyDAO companyDAO = new CompanyDAO();
-    private final JobPostingDAO jobPostingDAO = new JobPostingDAO();
+    private final StudentDAO studentDAO = DAOFactory.getInstance().getStudentDAO();
+    private final ApplicationDAO applicationDAO = DAOFactory.getInstance().getApplicationDAO();
+    private final CompanyDAO companyDAO = DAOFactory.getInstance().getCompanyDAO();
+    private final JobPostingDAO jobPostingDAO = DAOFactory.getInstance().getJobPostingDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -53,6 +59,10 @@ public class AdminDashboardServlet extends HttpServlet {
             req.setAttribute("shortlistedStudents", stats.shortlistedStudents);
             req.setAttribute("pendingApplications", stats.pendingApplications);
             req.setAttribute("activeJobs", stats.activeJobs);
+            req.setAttribute("shortlistedApps", stats.shortlistedApps);
+            req.setAttribute("interviewApps", stats.interviewApps);
+            req.setAttribute("selectedApps", stats.selectedApps);
+            req.setAttribute("rejectedApps", stats.rejectedApps);
 
             // Branch-wise placement data for charts
             req.setAttribute("branchData", getBranchWisePlacements());
@@ -61,9 +71,9 @@ public class AdminDashboardServlet extends HttpServlet {
             req.getRequestDispatcher("/pages/admin_dashboard.jsp").forward(req, resp);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Exception occurred: ", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                "Error loading dashboard: " + e.getMessage());
+                "Error loading dashboard.");
         }
     }
 
@@ -118,7 +128,7 @@ public class AdminDashboardServlet extends HttpServlet {
 
             // Pending applications
             try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM applications WHERE status = 'APPLIED'")) {
+                    "SELECT COUNT(*) FROM applications WHERE status = 'PENDING'")) {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) stats.pendingApplications = rs.getInt(1);
             }
@@ -128,6 +138,22 @@ public class AdminDashboardServlet extends HttpServlet {
                     "SELECT COUNT(*) FROM job_postings WHERE deadline >= CURDATE()")) {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next()) stats.activeJobs = rs.getInt(1);
+            }
+
+            // Per-status application counts for chart
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT status, COUNT(*) as cnt FROM applications GROUP BY status")) {
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    String status = rs.getString("status");
+                    int cnt = rs.getInt("cnt");
+                    switch (status) {
+                        case "SHORTLISTED": stats.shortlistedApps = cnt; break;
+                        case "INTERVIEW": stats.interviewApps = cnt; break;
+                        case "SELECTED": stats.selectedApps = cnt; break;
+                        case "REJECTED": stats.rejectedApps = cnt; break;
+                    }
+                }
             }
         }
 
@@ -176,5 +202,9 @@ public class AdminDashboardServlet extends HttpServlet {
         int shortlistedStudents = 0;
         int pendingApplications = 0;
         int activeJobs = 0;
+        int shortlistedApps = 0;
+        int interviewApps = 0;
+        int selectedApps = 0;
+        int rejectedApps = 0;
     }
 }

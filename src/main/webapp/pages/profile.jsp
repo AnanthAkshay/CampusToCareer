@@ -65,15 +65,15 @@
           String initials = String.valueOf(nameParts[0].charAt(0));
           if (nameParts.length > 1) initials += nameParts[nameParts.length - 1].charAt(0);
         %>
-        <%=initials.toUpperCase()%>
+        <%= com.rit.placement.util.XSSUtil.escape(initials.toUpperCase()) %>
       </div>
       <div class="profile-header-info">
-        <h1 class="page-title"><%=displayName%></h1>
+        <h1 class="page-title"><%= com.rit.placement.util.XSSUtil.escape(displayName) %></h1>
         <p class="page-subtitle">
           <span class="badge badge-info">STUDENT</span>
-          <span class="usn-badge">USN: <%=displayUsn%></span>
-          <span class="usn-badge">Branch: <%=displayBranch%></span>
-          <span class="usn-badge">Semester: <%=displaySem%></span>
+          <span class="usn-badge">USN: <%= com.rit.placement.util.XSSUtil.escape(displayUsn) %></span>
+          <span class="usn-badge">Branch: <%= com.rit.placement.util.XSSUtil.escape(displayBranch) %></span>
+          <span class="usn-badge">Semester: <%= com.rit.placement.util.XSSUtil.escape(displaySem) %></span>
         </p>
       </div>
     </div>
@@ -82,14 +82,14 @@
     <% if (successMessage != null) { %>
       <div class="alert alert-success">
         <span class="alert-icon">✓</span>
-        <%=successMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(successMessage) %>
       </div>
     <% } %>
     
     <% if (errorMessage != null) { %>
       <div class="alert alert-error">
         <span class="alert-icon">✕</span>
-        <%=errorMessage%>
+        <%= com.rit.placement.util.XSSUtil.escape(errorMessage) %>
       </div>
     <% } %>
 
@@ -103,6 +103,8 @@
 
         <form action="${pageContext.request.contextPath}/student/profile" method="post" 
               onsubmit="return validateProfile(this)" class="profile-form">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
           
           <!-- Read-only Fields -->
           <div class="form-section">
@@ -111,24 +113,24 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="name">Full Name</label>
-                <input type="text" id="name" value="<%=displayName%>" readonly class="form-input-readonly">
+                <input type="text" id="name" value="<%= com.rit.placement.util.XSSUtil.escape(displayName) %>" readonly class="form-input-readonly">
               </div>
               
               <div class="form-group">
                 <label for="usn">USN</label>
-                <input type="text" id="usn" value="<%=displayUsn%>" readonly class="form-input-readonly">
+                <input type="text" id="usn" value="<%= com.rit.placement.util.XSSUtil.escape(displayUsn) %>" readonly class="form-input-readonly">
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="branch">Branch</label>
-                <input type="text" id="branch" value="<%=displayBranch%>" readonly class="form-input-readonly">
+                <input type="text" id="branch" value="<%= com.rit.placement.util.XSSUtil.escape(displayBranch) %>" readonly class="form-input-readonly">
               </div>
               
               <div class="form-group">
                 <label for="semester">Current Semester</label>
-                <input type="text" id="semester" value="<%=displaySem%>" readonly class="form-input-readonly">
+                <input type="text" id="semester" value="<%= com.rit.placement.util.XSSUtil.escape(displaySem) %>" readonly class="form-input-readonly">
               </div>
             </div>
           </div>
@@ -143,7 +145,7 @@
               </label>
               <textarea id="skills" name="skills" rows="4" 
                         placeholder="Enter your technical skills, separated by commas..."
-                        class="form-textarea"><%=displaySkills%></textarea>
+                        class="form-textarea"><%= com.rit.placement.util.XSSUtil.escape(displaySkills) %></textarea>
               <span class="form-hint">💡 List programming languages, frameworks, and tools you know</span>
             </div>
 
@@ -153,7 +155,7 @@
               </label>
               <textarea id="projects" name="projects" rows="6" 
                         placeholder="Describe your projects with technologies used..."
-                        class="form-textarea"><%=displayProjects%></textarea>
+                        class="form-textarea"><%= com.rit.placement.util.XSSUtil.escape(displayProjects) %></textarea>
               <span class="form-hint">💡 Include project name, description, and tech stack</span>
             </div>
 
@@ -163,7 +165,7 @@
               </label>
               <textarea id="experience" name="experience" rows="6" 
                         placeholder="Describe your work experience or internships..."
-                        class="form-textarea"><%=displayExperience%></textarea>
+                        class="form-textarea"><%= com.rit.placement.util.XSSUtil.escape(displayExperience) %></textarea>
               <span class="form-hint">💡 Include company name, role, duration, and responsibilities</span>
             </div>
           </div>
@@ -197,7 +199,7 @@
                 <h4>Resume</h4>
                 <% if (document != null && document.getResumePath() != null) { %>
                   <p class="document-status">✓ Uploaded</p>
-                  <a href="${pageContext.request.contextPath}/<%=document.getResumePath()%>" 
+                  <a href="${pageContext.request.contextPath}/<%= com.rit.placement.util.XSSUtil.escape(document.getResumePath()) %>" 
                      target="_blank" class="document-link">View Resume</a>
                 <% } else { %>
                   <p class="document-status-pending">⏳ Not uploaded</p>
@@ -206,6 +208,8 @@
             </div>
             <form action="${pageContext.request.contextPath}/student/upload" method="post" 
                   enctype="multipart/form-data" class="upload-form">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
               <input type="hidden" name="doc_type" value="resume">
               <input type="file" name="file" accept=".pdf" required class="file-input" id="resumeFile">
               <button type="submit" class="btn-upload">Upload Resume (PDF)</button>
@@ -220,7 +224,7 @@
                 <h4>Certificates</h4>
                 <% if (document != null && document.getCertificatesPath() != null) { %>
                   <p class="document-status">✓ Uploaded</p>
-                  <a href="${pageContext.request.contextPath}/<%=document.getCertificatesPath()%>" 
+                  <a href="${pageContext.request.contextPath}/<%= com.rit.placement.util.XSSUtil.escape(document.getCertificatesPath()) %>" 
                      target="_blank" class="document-link">View Certificates</a>
                 <% } else { %>
                   <p class="document-status-pending">⏳ Not uploaded</p>
@@ -229,6 +233,8 @@
             </div>
             <form action="${pageContext.request.contextPath}/student/upload" method="post" 
                   enctype="multipart/form-data" class="upload-form">
+    <input type="hidden" name="csrfToken" value="<%= session.getAttribute("csrfToken") %>">
+
               <input type="hidden" name="doc_type" value="certificate">
               <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png" required class="file-input" id="certFile">
               <button type="submit" class="btn-upload">Upload Certificate</button>
