@@ -170,7 +170,8 @@ public class EmailUtil {
      * Generate a random 6-digit OTP
      */
     public static String generateOTP() {
-        int otp = (int) (Math.random() * 900000) + 100000;
+        java.security.SecureRandom sr = new java.security.SecureRandom();
+        int otp = 100000 + sr.nextInt(900000);
         return String.valueOf(otp);
     }
 

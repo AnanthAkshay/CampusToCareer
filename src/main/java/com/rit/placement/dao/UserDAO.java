@@ -62,8 +62,7 @@ public class UserDAO {
         if (com.rit.placement.util.PasswordUtil.isBCryptHash(storedHash)) {
             return com.rit.placement.util.PasswordUtil.verifyPassword(plainPassword, storedHash);
         }
-        return plainPassword.equals(storedHash) || 
-               storedHash.startsWith("$2a$") && plainPassword.equals("password123");
+        return plainPassword.equals(storedHash);
     }
     
     /**

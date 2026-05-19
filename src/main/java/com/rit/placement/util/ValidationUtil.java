@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  */
 public class ValidationUtil {
 
-    private static final Pattern ALPHA_NUMERIC_PATTERN = Pattern.compile("^[a-zA-Z0-9\\\\s\\\\-_.,]*$");
+    private static final Pattern ALPHA_NUMERIC_PATTERN = Pattern.compile("^[a-zA-Z0-9\\s\\-_.,]*$");
     private static final Pattern USN_PATTERN = Pattern.compile("^[1-4][A-Z]{2}[0-9]{2}[A-Z]{2}[0-9]{3}$");
     
     public static String sanitizeString(String input, int maxLength) {
