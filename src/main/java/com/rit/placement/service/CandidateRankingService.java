@@ -220,28 +220,5 @@ public class CandidateRankingService {
         
         public int getTotalApplications() { return totalApplications; }
         public void setTotalApplications(int totalApplications) { this.totalApplications = totalApplications; }
-        
-        public String getScoreLabel() {
-            if (score >= 85) return "Excellent Candidate";
-            if (score >= 70) return "Strong Candidate";
-            if (score >= 55) return "Good Candidate";
-            if (score >= 40) return "Fair Candidate";
-            return "Consider";
-        }
-        
-        public String getScoreColor() {
-            if (score >= 85) return "#10b981"; // Green
-            if (score >= 70) return "#3b82f6"; // Blue
-            if (score >= 55) return "#8b5cf6"; // Purple
-            if (score >= 40) return "#f59e0b"; // Orange
-            return "#6b7280"; // Gray
-        }
-        
-        public String getRankBadge() {
-            if (rank == 1) return "🥇";
-            if (rank == 2) return "🥈";
-            if (rank == 3) return "🥉";
-            return "#" + rank;
-        }
     }
 }

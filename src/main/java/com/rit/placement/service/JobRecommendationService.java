@@ -306,19 +306,5 @@ public class JobRecommendationService {
         
         public List<String> getReasons() { return reasons; }
         public void setReasons(List<String> reasons) { this.reasons = reasons; }
-        
-        public String getScoreLabel() {
-            if (score >= 80) return "Excellent Match";
-            if (score >= 60) return "Good Match";
-            if (score >= 40) return "Fair Match";
-            return "Consider";
-        }
-        
-        public String getScoreColor() {
-            if (score >= 80) return "#10b981"; // Green
-            if (score >= 60) return "#3b82f6"; // Blue
-            if (score >= 40) return "#f59e0b"; // Orange
-            return "#6b7280"; // Gray
-        }
     }
 }

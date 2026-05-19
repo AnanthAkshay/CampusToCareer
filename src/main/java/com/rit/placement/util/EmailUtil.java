@@ -74,7 +74,7 @@ public class EmailUtil {
             return true;
 
         } catch (Exception e) {
-            logger.error("Failed to send OTP email: " + e.getMessage());
+            logger.error("Failed to send OTP email: {}", e.getMessage());
             logger.error("Exception occurred: ", e);
             return false;
         }
@@ -179,11 +179,7 @@ public class EmailUtil {
      * Validate email format
      */
     public static boolean isValidEmail(String email) {
-        if (email == null || email.trim().isEmpty()) {
-            return false;
-        }
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
-        return email.matches(emailRegex);
+        return ValidationUtil.isValidEmail(email);
     }
     
     /**
@@ -204,7 +200,7 @@ public class EmailUtil {
         
         // Validate email
         if (!isValidEmail(toEmail)) {
-            logger.error("ERROR: Invalid email address: " + toEmail);
+            logger.error("ERROR: Invalid email address: {}", toEmail);
             return false;
         }
 
@@ -232,7 +228,7 @@ public class EmailUtil {
             return true;
 
         } catch (Exception e) {
-            logger.error("Failed to send email to " + toEmail + ": " + e.getMessage());
+            logger.error("Failed to send email to {}: {}", toEmail, e.getMessage());
             logger.error("Exception occurred: ", e);
             
             // Log failure for retry/monitoring
@@ -247,9 +243,9 @@ public class EmailUtil {
     private void logEmailFailure(String toEmail, String subject, String error) {
         // In production, this would write to a database or log file for retry queue
         logger.error("EMAIL FAILURE LOG:");
-        logger.error("  To: " + toEmail);
-        logger.error("  Subject: " + subject);
-        logger.error("  Error: " + error);
-        logger.error("  Timestamp: " + new java.util.Date());
+        logger.error("  To: {}", toEmail);
+        logger.error("  Subject: {}", subject);
+        logger.error("  Error: {}", error);
+        logger.error("  Timestamp: {}", new java.util.Date());
     }
 }

@@ -279,12 +279,17 @@
                 <div class="job-title"><%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getRole()) %></div>
                 <div class="company-name"><%= com.rit.placement.util.XSSUtil.escape(rec.getJob().getCompanyName()) %></div>
               </div>
+              <%
+                int score = rec.getScore();
+                String scoreColor = score >= 80 ? "#10b981" : score >= 60 ? "#3b82f6" : score >= 40 ? "#f59e0b" : "#6b7280";
+                String scoreLabel = score >= 80 ? "Excellent Match" : score >= 60 ? "Good Match" : score >= 40 ? "Fair Match" : "Consider";
+              %>
               <div class="match-score">
-                <div class="score-value" style="color: <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreColor()) %>">
+                <div class="score-value" style="color: <%= scoreColor %>">
                   <%= com.rit.placement.util.XSSUtil.escape(rec.getScore()) %>
                 </div>
-                <div class="score-label" style="color: <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreColor()) %>">
-                  <%= com.rit.placement.util.XSSUtil.escape(rec.getScoreLabel()) %>
+                <div class="score-label" style="color: <%= scoreColor %>">
+                  <%= scoreLabel %>
                 </div>
               </div>
             </div>

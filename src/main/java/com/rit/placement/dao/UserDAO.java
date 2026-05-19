@@ -48,7 +48,7 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Authentication error for USN " + usn + ": " + e.getMessage());
+            logger.error("Authentication error for USN {}: {}", usn, e.getMessage());
             logger.error("Database error", e);
         }
         return null;
@@ -97,7 +97,7 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Error fetching user " + userId + ": " + e.getMessage());
+            logger.error("Error fetching user {}: {}", userId, e.getMessage());
             logger.error("Database error", e);
         }
         return null;
@@ -135,7 +135,7 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Error fetching user by USN " + usn + ": " + e.getMessage());
+            logger.error("Error fetching user by USN {}: {}", usn, e.getMessage());
             logger.error("Database error", e);
         }
         return null;
