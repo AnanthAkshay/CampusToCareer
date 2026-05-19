@@ -74,12 +74,7 @@ public class ApplyServlet extends HttpServlet {
             // Optimize N+1 query: Single LEFT JOIN query with pagination
             List<JobApplicationStatus> jobStatuses = jobPostingDAO.getJobsWithApplicationStatus(userId, limit, offset);
 
-            // Cache CGPA in Session to prevent repeated DB calculation
-            Double cgpa = (Double) session.getAttribute("cached_cgpa");
-            if (cgpa == null) {
-                cgpa = CGPACalculator.calculateCGPA(userId);
-                session.setAttribute("cached_cgpa", cgpa);
-            }
+            double cgpa = CGPACalculator.calculateCGPA(userId);
             
             Student student = DAOFactory.getInstance().getStudentDAO().getStudentById(userId);
 

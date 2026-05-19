@@ -48,7 +48,7 @@ public class CandidateRankingService {
                 double cgpa = CGPACalculator.calculateCGPA(app.getStudentId());
                 
                 // Get total applications count
-                int totalApplications = applicationDAO.getApplicationsByStudent(app.getStudentId()).size();
+                int totalApplications = applicationDAO.getApplicationCountByStudent(app.getStudentId());
                 
                 // Calculate score
                 int score = calculateCandidateScore(job, student, cgpa, totalApplications);

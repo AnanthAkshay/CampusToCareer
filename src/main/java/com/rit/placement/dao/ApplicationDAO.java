@@ -38,6 +38,23 @@ public class ApplicationDAO {
         public int getRejected() { return rejected; }
     }
     
+    public int getApplicationCountByStudent(int studentId) {
+        String sql = "SELECT COUNT(*) FROM applications WHERE student_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, studentId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            logger.error("Error counting applications for student " + studentId + ": " + e.getMessage());
+            logger.error("Database error", e);
+        }
+        return 0;
+    }
+
     public List<Application> getApplicationsByStudent(int studentId) {
         return getApplicationsByStudent(studentId, 1000, 0);
     }

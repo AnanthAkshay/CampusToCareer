@@ -64,7 +64,7 @@ public class EligibilityService {
      * @param job the job posting
      * @return true if eligible, false otherwise
      */
-    public boolean isEligible(Student student, double cgpa, JobPosting job) {
+    public boolean isEligible(Student student, double cgpa, JobPosting job) throws SQLException {
         if (student == null || job == null || cgpa < 0) {
             return false;
         }
@@ -100,31 +100,23 @@ public class EligibilityService {
     /**
      * Check if student's branch is in the allowed branches list.
      */
-    private boolean checkBranchEligibility(String studentBranch, JobPosting job) {
+    private boolean checkBranchEligibility(String studentBranch, JobPosting job) throws SQLException {
         String allowedBranches = job.getAllowedBranches();
         if (allowedBranches == null || allowedBranches.trim().isEmpty()) {
             return true;
         }
-        try {
-            return jobPostingDAO.hasAllowedBranch(job.getJobId(), studentBranch);
-        } catch (SQLException e) {
-            return false;
-        }
+        return jobPostingDAO.hasAllowedBranch(job.getJobId(), studentBranch);
     }
 
     /**
      * Check if student's skills overlap with required skills.
      */
-    private boolean checkSkillsEligibility(int studentId, JobPosting job) {
+    private boolean checkSkillsEligibility(int studentId, JobPosting job) throws SQLException {
         String requiredSkills = job.getRequiredSkills();
         if (requiredSkills == null || requiredSkills.trim().isEmpty()) {
             return true;
         }
-        try {
-            return jobPostingDAO.hasOverlappingSkills(job.getJobId(), studentId);
-        } catch (SQLException e) {
-            return false;
-        }
+        return jobPostingDAO.hasOverlappingSkills(job.getJobId(), studentId);
     }
 
     /**

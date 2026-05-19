@@ -45,6 +45,21 @@ public class OTPServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
     }
 
+    private static final java.util.concurrent.ConcurrentHashMap<String, Long> ipCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final java.util.concurrent.ConcurrentHashMap<String, Long> usnCooldowns = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final long COOLDOWN_MS = 60 * 1000; // 60 seconds
+
+    private String generateMockMaskedEmail(String usn) {
+        if (usn == null || usn.trim().isEmpty()) {
+            return "stu****@rit.edu";
+        }
+        String cleanUsn = usn.trim().toLowerCase();
+        if (cleanUsn.length() >= 5) {
+            return cleanUsn.substring(0, 3) + "****@rit.edu";
+        }
+        return "stu****@rit.edu";
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -52,6 +67,7 @@ public class OTPServlet extends HttpServlet {
         // 1. Get USN from request
         String usn = req.getParameter("usn");
         String clientIp = req.getRemoteAddr();
+        long now = System.currentTimeMillis();
         
         logger.info("OTP request received for USN: {} from IP: {}", usn, clientIp);
 
@@ -65,52 +81,87 @@ public class OTPServlet extends HttpServlet {
 
         usn = usn.trim().toUpperCase();
 
+        // 3. Cooldown check
+        if (ipCooldowns.containsKey(clientIp)) {
+            long lastSend = ipCooldowns.get(clientIp);
+            if (now - lastSend < COOLDOWN_MS) {
+                logger.warn("IP {} is rate limited", clientIp);
+                req.getSession().setAttribute("errorMessage", "Too many OTP requests. Please wait a minute.");
+                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
+                return;
+            }
+        }
+        if (usnCooldowns.containsKey(usn)) {
+            long lastSend = usnCooldowns.get(usn);
+            if (now - lastSend < COOLDOWN_MS) {
+                logger.warn("USN {} is rate limited", usn);
+                req.getSession().setAttribute("errorMessage", "Too many OTP requests. Please wait a minute.");
+                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
+                return;
+            }
+        }
+
+        // Update cooldowns
+        ipCooldowns.put(clientIp, now);
+        usnCooldowns.put(usn, now);
+
         try {
-            // 3. Fetch user from database
+            // 4. Fetch user from database
             User user = userDAO.getUserByUSN(usn);
+            
+            // Set up a session for OTP verification
+            HttpSession session = req.getSession(true);
 
-            if (user == null) {
-                logger.warn("OTP request failed: User not found for USN: {} from IP: {}", usn, clientIp);
-                auditLogger.info("LOGIN_ATTEMPT_FAILED - USN: {}, Reason: User not found, IP: {}", usn, clientIp);
-                metricsService.recordLogin("UNKNOWN", false);
-                req.getSession().setAttribute("errorMessage", "User not found with USN: " + usn);
-                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
+            if (user == null || !user.isActive()) {
+                // Return generic response to prevent USN enumeration / inactive account enumeration
+                String maskedEmail = generateMockMaskedEmail(usn);
+                logger.warn("OTP request failed for USN: {} (User not found or inactive). Initiating dummy flow.", usn);
+                
+                // Setup dummy OTP session attributes so attacker gets redirected to verify page
+                // but can never successfully verify any OTP entered.
+                session.setAttribute("otp", "DUMMY_" + java.util.UUID.randomUUID().toString());
+                session.setAttribute("otp_timestamp", System.currentTimeMillis());
+                session.setAttribute("otp_usn", usn);
+                session.setAttribute("otp_user_id", -1);
+                session.setAttribute("otp_user_name", "Student");
+                session.setAttribute("otp_user_role", "STUDENT");
+                session.setAttribute("otp_email", maskedEmail);
+                session.setAttribute("otp_attempts", 0);
+                
+                session.setMaxInactiveInterval(OTP_VALIDITY_MINUTES * 60);
+                session.setAttribute("successMessage", "If your USN is registered and active, an OTP has been sent.");
+                resp.sendRedirect(req.getContextPath() + "/pages/verify-otp.jsp");
                 return;
             }
 
-            // 4. Check if user is active
-            if (!user.isActive()) {
-                logger.warn("OTP request failed: Inactive account for USN: {} from IP: {}", usn, clientIp);
-                auditLogger.info("LOGIN_ATTEMPT_FAILED - USN: {}, Reason: Account inactive, IP: {}", usn, clientIp);
-                metricsService.recordLogin(user.getRole(), false);
-                req.getSession().setAttribute("errorMessage", "Your account is inactive. Please contact admin.");
-                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
-                return;
-            }
-
-            // 5. Get user's email
+            // Get user's email
             String email = getUserEmail(user.getUserId());
             
-            if (email == null || email.trim().isEmpty()) {
-                logger.error("OTP request failed: No email found for USN: {} (UserID: {})", usn, user.getUserId());
-                req.getSession().setAttribute("errorMessage", "No email found for this user. Please contact admin.");
-                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
+            if (email == null || email.trim().isEmpty() || !EmailUtil.isValidEmail(email)) {
+                // Even if email is missing or malformed, return generic success to prevent enumeration
+                logger.error("OTP request failed: No valid email found for USN: {} (UserID: {}). Initiating dummy flow.", usn, user.getUserId());
+                
+                String maskedEmail = generateMockMaskedEmail(usn);
+                session.setAttribute("otp", "DUMMY_" + java.util.UUID.randomUUID().toString());
+                session.setAttribute("otp_timestamp", System.currentTimeMillis());
+                session.setAttribute("otp_usn", usn);
+                session.setAttribute("otp_user_id", -1);
+                session.setAttribute("otp_user_name", "Student");
+                session.setAttribute("otp_user_role", "STUDENT");
+                session.setAttribute("otp_email", maskedEmail);
+                session.setAttribute("otp_attempts", 0);
+                
+                session.setMaxInactiveInterval(OTP_VALIDITY_MINUTES * 60);
+                session.setAttribute("successMessage", "If your USN is registered and active, an OTP has been sent.");
+                resp.sendRedirect(req.getContextPath() + "/pages/verify-otp.jsp");
                 return;
             }
 
-            // 6. Validate email format
-            if (!EmailUtil.isValidEmail(email)) {
-                logger.error("OTP request failed: Invalid email format for USN: {} (Email: {})", usn, email);
-                req.getSession().setAttribute("errorMessage", "Invalid email format. Please contact admin.");
-                resp.sendRedirect(req.getContextPath() + "/pages/login-otp.jsp");
-                return;
-            }
-
-            // 7. Generate OTP
+            // Generate OTP
             String otp = EmailUtil.generateOTP();
             logger.debug("OTP generated for USN: {}", usn);
             
-            // 8. Send OTP via email
+            // Send OTP via email
             boolean emailSent = EmailUtil.sendOTPEmail(email, otp, user.getName());
             
             if (!emailSent) {
@@ -121,24 +172,25 @@ public class OTPServlet extends HttpServlet {
                 return;
             }
 
-            logger.info("OTP sent successfully to {} for USN: {}", maskEmail(email), usn);
-            auditLogger.info("OTP_SENT - USN: {}, Email: {}, IP: {}", usn, maskEmail(email), clientIp);
+            String maskedEmail = maskEmail(email);
+            logger.info("OTP sent successfully to {} for USN: {}", maskedEmail, usn);
+            auditLogger.info("OTP_SENT - USN: {}, Email: {}, IP: {}", usn, maskedEmail, clientIp);
 
-            // 9. Store OTP and user info in session
-            HttpSession session = req.getSession(true);
+            // Store OTP and user info in session
             session.setAttribute("otp", otp);
             session.setAttribute("otp_timestamp", System.currentTimeMillis());
             session.setAttribute("otp_usn", usn);
             session.setAttribute("otp_user_id", user.getUserId());
             session.setAttribute("otp_user_name", user.getName());
             session.setAttribute("otp_user_role", user.getRole());
-            session.setAttribute("otp_email", maskEmail(email));
+            session.setAttribute("otp_email", maskedEmail);
+            session.setAttribute("otp_attempts", 0);
 
-            // 10. Set session timeout for OTP (5 minutes)
+            // Set session timeout for OTP (5 minutes)
             session.setMaxInactiveInterval(OTP_VALIDITY_MINUTES * 60);
 
-            // 11. Redirect to OTP verification page
-            session.setAttribute("successMessage", "OTP sent to " + maskEmail(email));
+            // Redirect to OTP verification page
+            session.setAttribute("successMessage", "If your USN is registered and active, an OTP has been sent.");
             resp.sendRedirect(req.getContextPath() + "/pages/verify-otp.jsp");
 
         } catch (Exception e) {
