@@ -32,7 +32,7 @@ EXPOSE 8080
 # Set environment variables for database connection
 ENV DB_HOST=db
 ENV DB_PORT=3306
-ENV DB_NAME=placement_system
+ENV DB_NAME=rit_placement
 ENV DB_USER=root
 ENV DB_PASSWORD=placement_root_2024
 

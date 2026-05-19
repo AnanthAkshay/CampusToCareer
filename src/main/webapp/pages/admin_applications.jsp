@@ -106,6 +106,14 @@
   </main>
 
   <script src="${pageContext.request.contextPath}/js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const pageContent = document.querySelector('.page-content');
+      if (pageContent) {
+        pageContent.classList.add('fade-in');
+      }
+    });
+  </script>
   <style>
     .status-select {
       padding: 5px 10px;

@@ -155,6 +155,13 @@
 
   <script src="${pageContext.request.contextPath}/js/main.js"></script>
   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const pageContent = document.querySelector('.page-content');
+      if (pageContent) {
+        pageContent.classList.add('fade-in');
+      }
+    });
+
     // Branch-wise placements chart
     const branchData = <%=branchData != null ? branchData : "[]"%>;
     const branchLabels = branchData.map(d => d.branch);

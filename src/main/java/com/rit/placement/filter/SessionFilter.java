@@ -43,7 +43,9 @@ public class SessionFilter implements Filter {
     // Shared paths accessible by multiple roles
     private static final Set<String> SHARED_PATHS = Set.of(
         "/companies",
-        "/job-postings"
+        "/job-postings",
+        "/notifications",
+        "/api/notifications"
     );
 
     @Override

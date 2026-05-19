@@ -1,4 +1,4 @@
-version: "3.8"
+
 
 services:
   # -----------------------------
@@ -11,13 +11,13 @@ services:
 
     environment:
       MYSQL_ROOT_PASSWORD: Akshay@2006
-      MYSQL_DATABASE: placement_system
+      MYSQL_DATABASE: rit_placement
       MYSQL_USER: placement_user
       MYSQL_PASSWORD: placement_pass_2024
 
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./sql/docker-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
 
     networks:
       - placement-network
@@ -46,10 +46,9 @@ services:
         condition: service_healthy
 
     environment:
-      # ✅ IMPORTANT: use SAME DB as MySQL user (not root)
-      DB_URL: jdbc:mysql://db:3306/placement_system
-      DB_USER: placement_user
-      DB_PASSWORD: placement_pass_2024
+      DB_URL: jdbc:mysql://db:3306/rit_placement
+      DB_USER: root
+      DB_PASSWORD: Akshay@2006
 
       # SMTP Configuration
       SMTP_USERNAME: "ananthakshay2006@gmail.com"

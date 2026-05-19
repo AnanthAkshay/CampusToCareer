@@ -121,7 +121,7 @@ graph TB
 
         subgraph DB["🗄️ placement-db container"]
             M[MySQL 8.0 :3306]
-            subgraph Schema["placement_system DB"]
+            subgraph Schema["rit_placement DB"]
                 T1[(users)]
                 T2[(students)]
                 T3[(job_postings)]
@@ -456,10 +456,7 @@ cd CampusToCareer
 
 **2. Set up the database**
 ```bash
-mysql -u root -p < sql/docker-init.sql
-mysql -u root -p placement_system < APPLY_FIXES.sql
-mysql -u root -p placement_system < sql/fix_students_table.sql
-mysql -u root -p placement_system < sql/create_documents_table.sql
+mysql -u root -p < sql/init.sql
 ```
 
 **3. Configure environment**
@@ -522,7 +519,7 @@ Host Machine
 │   └── placement-db   [MySQL 8.0]
 │         Port: 3306:3306
 │         Volume: mysql_data (persistent)
-│         Init: sql/docker-init.sql
+│         Init: sql/init.sql
 │
 └── External: http://localhost:8080
 ```
@@ -592,16 +589,14 @@ CampusToCareer/
 │               └── web.xml
 │
 ├── sql/
-│   ├── docker-init.sql              # Full schema + seed data
-│   ├── fix_students_table.sql       # Patch: add missing columns
-│   └── create_documents_table.sql   # Documents module schema
+│   └── init.sql                     # Full schema + seed data (single source of truth)
 │
 ├── data/                            # Mounted volume for uploads
-├── Dockerfile                       # Multi-stage build
-├── docker-compose.yml
-├── .env.example
-├── pom.xml
-└── README.md
+├── Dockerfile                       # Multi-stage Docker build
+├── docker-compose.yml               # MySQL + Tomcat orchestration
+├── .env.example                     # Environment variable template
+├── pom.xml                          # Maven build config
+└── README.md                        # This file
 ```
 
 ---
@@ -627,7 +622,7 @@ CampusToCareer/
 |---|---|---|
 | `DB_HOST` | Database hostname | `db` (Docker) / `localhost` |
 | `DB_PORT` | MySQL port | `3306` |
-| `DB_NAME` | Database name | `placement_system` |
+| `DB_NAME` | Database name | `rit_placement` |
 | `DB_USER` | Database user | `root` |
 | `DB_PASSWORD` | Database password | `your_password` |
 | `SMTP_USERNAME` | Email sender address | `noreply@ritplacement.edu` |
@@ -641,8 +636,25 @@ CampusToCareer/
 | Role | Username | Password |
 |---|---|---|
 | Coordinator (Admin) | `ADMIN001` | `admin123` |
-| Student | *(Register via admin panel)* | — |
+| Coordinator | `COORD001` | `admin123` |
+| Student | Any USN from `data/students.csv` | OTP via email or Docker logs |
 | Company | *(Registered + approved by admin)* | — |
+
+### 🔐 OTP Login (Dev Mode)
+
+If SMTP is not configured, the system runs in **DEV MODE** — OTPs are printed to the Docker log instead of being emailed:
+
+```bash
+# Get the OTP from Docker logs
+docker compose logs app --tail 30
+
+# Look for output like:
+# ========================================
+# 📧 DEV MODE: OTP for AKSHAY A → 123456
+# ========================================
+```
+
+To enable real email, set `SMTP_USERNAME`, `SMTP_PASSWORD`, and `SMTP_FROM_EMAIL` in `docker-compose.yml` or your `.env` file.
 
 ---
 

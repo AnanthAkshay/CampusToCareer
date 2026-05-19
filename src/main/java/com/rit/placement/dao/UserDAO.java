@@ -54,8 +54,9 @@ public class UserDAO {
      * TODO: Replace with BCrypt.checkpw() in production
      */
     private boolean verifyPassword(String plainPassword, String storedHash) {
-        // TEMPORARY: Simple comparison for development
-        // PRODUCTION: Use BCrypt.checkpw(plainPassword, storedHash)
+        if (com.rit.placement.util.PasswordUtil.isBCryptHash(storedHash)) {
+            return com.rit.placement.util.PasswordUtil.verifyPassword(plainPassword, storedHash);
+        }
         return plainPassword.equals(storedHash) || 
                storedHash.startsWith("$2a$") && plainPassword.equals("password123");
     }

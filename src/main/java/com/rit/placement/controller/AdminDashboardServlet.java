@@ -35,7 +35,7 @@ public class AdminDashboardServlet extends HttpServlet {
         }
 
         String role = (String) session.getAttribute("role");
-        if (!"COORDINATOR".equalsIgnoreCase(role)) {
+        if (!"COORDINATOR".equalsIgnoreCase(role) && !"ADMIN".equalsIgnoreCase(role)) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
             return;
         }

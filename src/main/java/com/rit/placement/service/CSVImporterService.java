@@ -35,29 +35,24 @@ public class CSVImporterService {
     private static final String DEFAULT_PASSWORD = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy"; // BCrypt hash of "student123"
     
     /**
-     * Import students from CSV file
-     * Only runs if users table is empty or has only admin
+     * Import students from CSV file.
+     * Only runs if no students exist in the database.
+     * Throws on DB failure so the caller's retry loop can react.
      */
-    public static void importStudentsIfNeeded() {
-        try {
-            // Check if import is needed
-            if (!shouldImport()) {
-                logger.info("CSV import skipped - users already exist in database");
-                return;
-            }
-            
-            logger.info("Starting CSV import process...");
-            auditLogger.info("CSV_IMPORT_STARTED - Importing students from CSV file");
-            
-            int imported = importStudents();
-            
-            logger.info("CSV import completed successfully. Imported {} students", imported);
-            auditLogger.info("CSV_IMPORT_COMPLETED - Total students imported: {}", imported);
-            
-        } catch (Exception e) {
-            logger.error("CSV import failed", e);
-            auditLogger.info("CSV_IMPORT_FAILED - Error: {}", e.getMessage());
+    public static void importStudentsIfNeeded() throws Exception {
+        // Check if import is needed — will throw if DB not ready
+        if (!shouldImport()) {
+            logger.info("CSV import skipped - users already exist in database");
+            return;
         }
+
+        logger.info("Starting CSV import process...");
+        auditLogger.info("CSV_IMPORT_STARTED - Importing students from CSV file");
+
+        int imported = importStudents();
+
+        logger.info("CSV import completed successfully. Imported {} students", imported);
+        auditLogger.info("CSV_IMPORT_COMPLETED - Total students imported: {}", imported);
     }
     
     /**
