@@ -1,22 +1,22 @@
 package com.rit.placement.dao;
 
 import com.rit.placement.model.Notification;
-import com.rit.placement.util.TestDBConnection;
+import com.rit.placement.util.MockDBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test version of NotificationDAO
+ * Mock version of NotificationDAO that uses MockDBConnection
  */
-public class TestNotificationDAO {
+public class MockNotificationDAO {
     
     public int createNotification(Notification notification) throws SQLException {
         String sql = "INSERT INTO notifications (user_id, title, message, type, related_id) " +
                      "VALUES (?, ?, ?, ?, ?)";
         
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
             stmt.setInt(1, notification.getUserId());
@@ -32,9 +32,10 @@ public class TestNotificationDAO {
             
             stmt.executeUpdate();
             
-            ResultSet keys = stmt.getGeneratedKeys();
-            if (keys.next()) {
-                return keys.getInt(1);
+            try (ResultSet keys = stmt.getGeneratedKeys()) {
+                if (keys.next()) {
+                    return keys.getInt(1);
+                }
             }
             throw new SQLException("Failed to retrieve generated notification_id");
         }
@@ -44,14 +45,14 @@ public class TestNotificationDAO {
         String sql = "SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50";
         List<Notification> notifications = new ArrayList<>();
         
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                notifications.add(mapRow(rs));
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    notifications.add(mapRow(rs));
+                }
             }
         }
         
@@ -61,14 +62,14 @@ public class TestNotificationDAO {
     public int getUnreadCount(int userId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = FALSE";
         
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);
-            ResultSet rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getInt(1);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         }
         
@@ -78,7 +79,7 @@ public class TestNotificationDAO {
     public void markAsRead(int notificationId) throws SQLException {
         String sql = "UPDATE notifications SET is_read = TRUE WHERE notification_id = ?";
         
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, notificationId);
@@ -89,7 +90,7 @@ public class TestNotificationDAO {
     public void markAllAsRead(int userId) throws SQLException {
         String sql = "UPDATE notifications SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE";
         
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, userId);

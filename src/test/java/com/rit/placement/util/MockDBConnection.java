@@ -6,9 +6,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Test database connection utility using H2 in-memory database
+ * Test database connection utility using H2 in-memory database (Mocked version)
  */
-public class TestDBConnection {
+public class MockDBConnection {
     
     private static final String URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL";
     private static final String USER = "sa";

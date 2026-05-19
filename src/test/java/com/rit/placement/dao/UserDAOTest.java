@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("UserDAO Tests")
 class UserDAOTest extends BaseTest {
     
-    private TestUserDAO userDAO;
+    private MockUserDAO userDAO;
     
     @BeforeEach
     public void setUpDAO() {
-        userDAO = new TestUserDAO();
+        userDAO = new MockUserDAO();
     }
     
     @Test

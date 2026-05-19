@@ -211,10 +211,10 @@ public class OTPServlet extends HttpServlet {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
             ps.setInt(1, userId);
-            ResultSet rs = ps.executeQuery();
-            
-            if (rs.next()) {
-                return rs.getString("email");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("email");
+                }
             }
         }
         return null;

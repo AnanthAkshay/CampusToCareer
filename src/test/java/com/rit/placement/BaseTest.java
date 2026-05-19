@@ -1,6 +1,6 @@
 package com.rit.placement;
 
-import com.rit.placement.util.TestDBConnection;
+import com.rit.placement.util.MockDBConnection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -14,13 +14,13 @@ public abstract class BaseTest {
     @BeforeEach
     public void setUp() throws SQLException {
         // Clear data before each test
-        TestDBConnection.clearAllData();
-        TestDBConnection.resetSequences();
+        MockDBConnection.clearAllData();
+        MockDBConnection.resetSequences();
     }
     
     @AfterEach
     public void tearDown() throws SQLException {
         // Clean up after each test
-        TestDBConnection.clearAllData();
+        MockDBConnection.clearAllData();
     }
 }

@@ -18,14 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("NotificationDAO Tests")
 class NotificationDAOTest extends BaseTest {
     
-    private TestNotificationDAO notificationDAO;
-    private TestUserDAO userDAO;
+    private MockNotificationDAO notificationDAO;
+    private MockUserDAO userDAO;
     private int testUserId;
     
     @BeforeEach
     public void setUpDAO() throws SQLException {
-        notificationDAO = new TestNotificationDAO();
-        userDAO = new TestUserDAO();
+        notificationDAO = new MockNotificationDAO();
+        userDAO = new MockUserDAO();
         
         // Create test user
         User user = new User();

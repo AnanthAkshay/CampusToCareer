@@ -1,13 +1,13 @@
 package com.rit.placement.integration;
 
 import com.rit.placement.BaseTest;
-import com.rit.placement.dao.TestApplicationDAO;
-import com.rit.placement.dao.TestNotificationDAO;
-import com.rit.placement.dao.TestUserDAO;
+import com.rit.placement.dao.MockApplicationDAO;
+import com.rit.placement.dao.MockNotificationDAO;
+import com.rit.placement.dao.MockUserDAO;
 import com.rit.placement.model.Application;
 import com.rit.placement.model.Notification;
 import com.rit.placement.model.User;
-import com.rit.placement.util.TestDBConnection;
+import com.rit.placement.util.MockDBConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("Application Flow Integration Tests")
 class ApplicationFlowIntegrationTest extends BaseTest {
     
-    private TestUserDAO userDAO;
-    private TestApplicationDAO applicationDAO;
-    private TestNotificationDAO notificationDAO;
+    private MockUserDAO userDAO;
+    private MockApplicationDAO applicationDAO;
+    private MockNotificationDAO notificationDAO;
     
     private int studentId;
     private int companyId;
@@ -35,9 +35,9 @@ class ApplicationFlowIntegrationTest extends BaseTest {
     
     @BeforeEach
     public void setUpIntegrationTest() throws SQLException {
-        userDAO = new TestUserDAO();
-        applicationDAO = new TestApplicationDAO();
-        notificationDAO = new TestNotificationDAO();
+        userDAO = new MockUserDAO();
+        applicationDAO = new MockApplicationDAO();
+        notificationDAO = new MockNotificationDAO();
         
         // Set up test data
         setupTestData();
@@ -245,7 +245,7 @@ class ApplicationFlowIntegrationTest extends BaseTest {
         studentId = userDAO.insertUser(student);
         
         // Create student record
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO students (student_id, branch, current_sem) VALUES (?, ?, ?)")) {
             stmt.setInt(1, studentId);
@@ -265,7 +265,7 @@ class ApplicationFlowIntegrationTest extends BaseTest {
         companyId = userDAO.insertUser(company);
         
         // Create company record
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO companies (company_id, company_name) VALUES (?, ?)",
                  PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -279,7 +279,7 @@ class ApplicationFlowIntegrationTest extends BaseTest {
     }
     
     private int createTestJob(String role) throws SQLException {
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO job_postings (company_id, role, min_cgpa) VALUES (1, ?, 7.0)",
                  PreparedStatement.RETURN_GENERATED_KEYS)) {

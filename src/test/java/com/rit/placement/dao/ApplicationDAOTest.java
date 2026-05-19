@@ -3,7 +3,7 @@ package com.rit.placement.dao;
 import com.rit.placement.BaseTest;
 import com.rit.placement.model.Application;
 import com.rit.placement.model.User;
-import com.rit.placement.util.TestDBConnection;
+import com.rit.placement.util.MockDBConnection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,15 +21,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("ApplicationDAO Tests")
 class ApplicationDAOTest extends BaseTest {
     
-    private TestApplicationDAO applicationDAO;
-    private TestUserDAO userDAO;
+    private MockApplicationDAO applicationDAO;
+    private MockUserDAO userDAO;
     private int testStudentId;
     private int testJobId;
     
     @BeforeEach
     public void setUpDAO() throws SQLException {
-        applicationDAO = new TestApplicationDAO();
-        userDAO = new TestUserDAO();
+        applicationDAO = new MockApplicationDAO();
+        userDAO = new MockUserDAO();
         
         // Create test student
         User student = new User();
@@ -41,7 +41,7 @@ class ApplicationDAOTest extends BaseTest {
         testStudentId = userDAO.insertUser(student);
         
         // Create test student record
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO students (student_id, branch, current_sem) VALUES (?, ?, ?)")) {
             stmt.setInt(1, testStudentId);
@@ -51,7 +51,7 @@ class ApplicationDAOTest extends BaseTest {
         }
         
         // Create test company and job
-        try (Connection conn = TestDBConnection.getConnection()) {
+        try (Connection conn = MockDBConnection.getConnection()) {
             PreparedStatement stmt1 = conn.prepareStatement(
                 "INSERT INTO companies (company_name) VALUES (?)",
                 PreparedStatement.RETURN_GENERATED_KEYS);
@@ -183,7 +183,7 @@ class ApplicationDAOTest extends BaseTest {
     }
     
     private int createTestJob(String role) throws SQLException {
-        try (Connection conn = TestDBConnection.getConnection();
+        try (Connection conn = MockDBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO job_postings (company_id, role, min_cgpa) VALUES (1, ?, 7.0)",
                  PreparedStatement.RETURN_GENERATED_KEYS)) {
